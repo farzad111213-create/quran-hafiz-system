@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سیستم دائمی مدیریت حفظ قرآن</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f4;color:#26352f;font-family:Tahoma,Arial,sans-serif}
+header{background:#173f35;color:#fff;padding:20px;text-align:center}
+header h1{margin:0 0 8px;font-size:23px}
+.container{max-width:1450px;margin:auto;padding:15px}
+nav{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:15px}
+nav button,.btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-family:inherit}
+nav button{background:#fff;color:#173f35;box-shadow:0 2px 7px #0001}
+nav button.active,.primary{background:#173f35;color:#fff}
+.secondary{background:#e5eee9;color:#173f35}
+.danger{background:#9c3030;color:#fff}
+.warning{background:#c58925;color:#fff}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border-radius:13px;padding:18px;margin-bottom:15px;box-shadow:0 3px 12px #0000000d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+label{font-weight:bold;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #ccd7d1;border-radius:7px;font:inherit;background:#fff}
+textarea{min-height:90px;resize:vertical}
+.stat{background:#eef5f1;border-radius:11px;padding:15px;text-align:center}
+.stat strong{display:block;font-size:25px;color:#173f35;margin-top:5px}
+.badge{display:inline-block;padding:4px 8px;border-radius:15px;font-size:11px;margin:2px}
+.done{background:#dcefdc;color:#23662b}.pending{background:#fff0cf;color:#805900}
+.late{background:#f5dada;color:#8c2020}.cancelled{background:#e7e7e7;color:#666}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #d7dfdb;padding:7px;text-align:center}
+th{background:#173f35;color:#fff}
+tr:nth-child(even){background:#f8faf9}
+.actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.page-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:7px}
+.page-mini{padding:9px;background:#f4f7f5;border:1px solid #dce4e0;border-radius:7px;text-align:center;cursor:pointer}
+.page-mini:hover{background:#e5eee9}
+.page-mini strong{display:block;font-size:18px;color:#173f35}
+.section-title{border-right:5px solid #173f35;padding-right:9px}
+.progress{height:12px;background:#e3e9e6;border-radius:20px;overflow:hidden}
+.progress i{display:block;height:100%;background:#173f35;width:0}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-head{background:#173f35;color:#fff;text-align:center;padding:7px;border-radius:5px;font-size:12px}
+.cal-day{min-height:90px;background:#f8faf9;border:1px solid #dce4df;border-radius:6px;padding:5px;cursor:pointer}
+.cal-day:hover{background:#eaf1ed}
+.cal-day.today{border:2px solid #173f35}
+.cal-day.other{opacity:.35}
+.cal-num{font-weight:bold}
+.cal-count{font-size:10px;margin-top:5px}
+.small{font-size:12px;color:#68766f}
+.empty{text-align:center;padding:25px;color:#75817c}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:end}
+.toolbar>div{flex:1;min-width:150px}
+hr{border:0;border-top:1px solid #e1e6e3;margin:18px 0}
+canvas{max-height:360px}
+@media(max-width:650px){
+.container{padding:8px}.calendar{gap:3px}.cal-day{min-height:70px}
+th,td{font-size:10px;padding:5px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>سیستم دائمی مدیریت حفظ، مرور و انس با قرآن</h1>
+<div>۶۰۴ صفحه | ۳۰ جزء | برنامه‌ریزی دائمی | تاریخچه دائمی | تقویم شمسی</div>
+</header>
+
+<div class="container">
+
+<nav>
+<button class="active" onclick="show('dashboard',this)">داشبورد</button>
+<button onclick="show('planner',this)">برنامه‌ها</button>
+<button onclick="show('calendarPage',this)">تقویم</button>
+<button onclick="show('daily',this)">گزارش روزانه</button>
+<button onclick="show('weekly',this)">گزارش هفتگی</button>
+<button onclick="show('monthly',this)">گزارش ماهانه</button>
+<button onclick="show('quran',this)">۶۰۴ صفحه قرآن</button>
+<button onclick="show('history',this)">تاریخچه</button>
+<button onclick="show('backup',this)">پشتیبان</button>
+</nav>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+<div class="card">
+<h2>داشبورد</h2>
+<div class="grid">
+<div class="stat">برنامه امروز<strong id="dToday">0</strong></div>
+<div class="stat">انجام‌شده<strong id="dDone">0</strong></div>
+<div class="stat">باقی‌مانده<strong id="dPending">0</strong></div>
+<div class="stat">عقب‌افتاده<strong id="dLate">0</strong></div>
+<div class="stat">کل برنامه‌ها<strong id="dPlans">0</strong></div>
+<div class="stat">کل مرورها<strong id="dReviews">0</strong></div>
+</div>
+</div>
+
+<div class="card">
+<h2>دسترسی سریع به برنامه‌های امروز</h2>
+<div id="dashboardToday"></div>
+</div>
+
+<div class="card">
+<h2>تقویم کوچک</h2>
+<div class="toolbar">
+<div>
+<label>ماه</label>
+<input id="dashMonth" placeholder="مثلاً 1405/05" oninput="renderDashCalendar()">
+</div>
+</div>
+<br>
+<div id="dashCalendar"></div>
+</div>
+
+</section>
+
+<!-- PLANNER -->
+<section id="planner" class="page">
+
+<div class="card">
+<h2>مدیریت برنامه‌ها</h2>
+
+<div class="grid">
+<div>
+<label>تاریخ شمسی</label>
+<input id="pDate" placeholder="1405/05/20">
+</div>
+
+<div>
+<label>صفحه قرآن</label>
+<input id="pPage" type="number" min="1" max="604">
+</div>
+
+<div>
+<label>نوع برنامه</label>
+<select id="pType">
+<option>مرور معمولی</option>
+<option>بازیابی فعال</option>
+<option>مرور ذهنی</option>
+<option>سرآیات</option>
+<option>آزمون</option>
+<option>حفظ جدید</option>
+</select>
+</div>
+
+<div>
+<label>اولویت</label>
+<select id="pPriority">
+<option>عادی</option>
+<option>مهم</option>
+<option>خیلی مهم</option>
+</select>
+</div>
+</div>
+
+<br>
+
+<label>توضیح</label>
+<textarea id="pNote" placeholder="توضیحات برنامه..."></textarea>
+
+<br>
+
+<button class="btn primary" onclick="addPlan()">افزودن برنامه</button>
+<button class="btn secondary" onclick="clearPlanForm()">پاک کردن فرم</button>
+</div>
+
+<div class="card">
+<h2>جست‌وجوی برنامه‌ها</h2>
+
+<div class="toolbar">
+<div>
+<label>تاریخ</label>
+<input id="planFilterDate" placeholder="1405/05/20" oninput="renderPlans()">
+</div>
+<div>
+<label>وضعیت</label>
+<select id="planFilterStatus" onchange="renderPlans()">
+<option value="all">همه</option>
+<option value="pending">انجام‌نشده</option>
+<option value="done">انجام‌شده</option>
+<option value="late">عقب‌افتاده</option>
+<option value="cancelled">لغوشده</option>
+</select>
+</div>
+<div>
+<label>صفحه</label>
+<input id="planFilterPage" type="number" oninput="renderPlans()">
+</div>
+</div>
+
+<br>
+<div id="plansList"></div>
+</div>
+
+</section>
+
+<!-- CALENDAR -->
+<section id="calendarPage" class="page">
+
+<div class="card">
+<h2>تقویم شمسی</h2>
+
+<div class="toolbar">
+<div>
+<label>سال</label>
+<input id="calYear" type="number" value="1405" onchange="renderCalendar()">
+</div>
+<div>
+<label>ماه</label>
+<select id="calMonth" onchange="renderCalendar()">
+<option value="1">فروردین</option>
+<option value="2">اردیبهشت</option>
+<option value="3">خرداد</option>
+<option value="4">تیر</option>
+<option value="5">مرداد</option>
+<option value="6">شهریور</option>
+<option value="7">مهر</option>
+<option value="8">آبان</option>
+<option value="9">آذر</option>
+<option value="10">دی</option>
+<option value="11">بهمن</option>
+<option value="12">اسفند</option>
+</select>
+</div>
+<button class="btn secondary" onclick="goCurrentMonth()">ماه جاری</button>
+</div>
+
+<br>
+<div id="calendarBox"></div>
+</div>
+
+<div class="card">
+<h2 id="selectedDateTitle">برنامه‌های تاریخ انتخابی</h2>
+<div id="selectedDatePlans"></div>
+</div>
+
+</section>
+
+<!-- DAILY -->
+<section id="daily" class="page">
+
+<div class="card">
+<h2>گزارش روزانه</h2>
+
+<div class="grid">
+<div><label>تاریخ</label><input id="dailyDate"></div>
+<div><label>روز چرخه</label><input id="cycleDay" type="number"></div>
+<div><label>صفحات جدید</label><input id="newPages" type="number" value="2"></div>
+<div><label>مدت تمرین</label><input id="minutes" type="number"></div>
+</div>
+
+<br>
+
+<label>فعالیت‌ها</label>
+<div class="grid">
+<label><input type="checkbox" id="rReview"> مرور</label>
+<label><input type="checkbox" id="rAyat"> سرآیات</label>
+<label><input type="checkbox" id="rMental"> مرور ذهنی</label>
+<label><input type="checkbox" id="rQamus"> قاموس قرآن</label>
+</div>
+
+<br>
+<label>گزارش</label>
+<textarea id="dailyText"></textarea>
+<br>
+<label>نقطه ضعف</label>
+<input id="dailyWeakness">
+<br><br>
+<button class="btn primary" onclick="saveDaily()">ثبت گزارش</button>
+</div>
+
+<div class="card">
+<h2>گزارش‌های روزانه</h2>
+<div id="dailyList"></div>
+</div>
+</section>
+
+<!-- WEEKLY -->
+<section id="weekly" class="page">
+
+<div class="card">
+<h2>گزارش هفتگی</h2>
+<div class="grid">
+<div><label>سال</label><input id="wYear" type="number"></div>
+<div><label>شماره هفته</label><input id="wWeek" type="number"></div>
+</div>
+<br>
+<label>گزارش هفته</label>
+<textarea id="wText"></textarea>
+<br>
+<label>برنامه هفته آینده</label>
+<textarea id="wPlan"></textarea>
+<br>
+<button class="btn primary" onclick="saveWeekly()">ثبت گزارش هفتگی</button>
+</div>
+
+<div class="card">
+<h2>سوابق هفتگی</h2>
+<div id="weeklyList"></div>
+</div>
+</section>
+
+<!-- MONTHLY -->
+<section id="monthly" class="page">
+
+<div class="card">
+<h2>گزارش ماهانه</h2>
+<div class="grid">
+<div><label>سال</label><input id="mYear" type="number"></div>
+<div><label>ماه</label><input id="mMonth" type="number" min="1" max="12"></div>
+</div>
+<br>
+<label>گزارش ماه</label>
+<textarea id="mText"></textarea>
+<br>
+<label>موفقیت اصلی</label>
+<input id="mSuccess">
+<br><br>
+<label>مهم‌ترین اصلاح</label>
+<input id="mCorrection">
+<br><br>
+<label>هدف ماه آینده</label>
+<textarea id="mGoal"></textarea>
+<br>
+<button class="btn primary" onclick="saveMonthly()">ثبت گزارش ماهانه</button>
+</div>
+
+<div class="card">
+<h2>سوابق ماهانه</h2>
+<div id="monthlyList"></div>
+</div>
+</section>
+
+<!-- QURAN -->
+<section id="quran" class="page">
+
+<div class="card">
+<h2>۶۰۴ صفحه قرآن ـ ۳۰ جزء</h2>
+
+<div class="grid">
+<div>
+<label>جزء</label>
+<select id="juzSelect" onchange="renderJuz()"></select>
+</div>
+<div>
+<label>جست‌وجوی صفحه</label>
+<input id="pageSearch" type="number" min="1" max="604" oninput="searchQuranPage()">
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3 id="juzTitle"></h3>
+<div id="juzPages" class="page-grid"></div>
+</div>
+
+<div class="card" id="pageFile" style="display:none">
+<h2>پرونده صفحه <span id="filePage"></span></h2>
+
+<div class="grid">
+<div class="stat">جزء<strong id="fileJuz">0</strong></div>
+<div class="stat">تعداد مرور<strong id="fileReviews">0</strong></div>
+<div class="stat">تعداد برنامه<strong id="filePlans">0</strong></div>
+<div class="stat">تعداد سرآیات<strong id="fileAyat">0</strong></div>
+</div>
+
+<hr>
+
+<h3 class="section-title">ثبت مرور واقعی</h3>
+
+<div class="grid">
+<div><label>تاریخ</label><input id="revDate"></div>
+<div>
+<label>نوع مرور</label>
+<select id="revType">
+<option>مرور معمولی</option>
+<option>بازیابی فعال</option>
+<option>مرور ذهنی</option>
+<option>آزمون</option>
+<option>حفظ</option>
+</select>
+</div>
+<div>
+<label>وضعیت</label>
+<select id="revStatus">
+<option>عالی</option>
+<option>خوب</option>
+<option>متوسط</option>
+<option>ضعیف</option>
+</select>
+</div>
+<div><label>تعداد خطا</label><input id="revErrors" type="number" value="0"></div>
+</div>
+
+<br>
+<label>یادداشت</label>
+<textarea id="revNote"></textarea>
+<br>
+<button class="btn primary" onclick="saveReview()">ثبت مرور</button>
+
+<h3 class="section-title">تاریخچه مرورهای این صفحه</h3>
+<div id="reviewHistory"></div>
+
+<hr>
+
+<h3 class="section-title">سرآیات صفحه</h3>
+
+<div class="grid">
+<div><label>شماره</label><input id="ayatNo"></div>
+<div><label>شروع آیه</label><input id="ayatText"></div>
+</div>
+<br>
+<button class="btn secondary" onclick="addAyat()">افزودن سرآیه</button>
+<div id="ayatList"></div>
+
+</div>
+</section>
+
+<!-- HISTORY -->
+<section id="history" class="page">
+
+<div class="card">
+<h2>تاریخچه دائمی</h2>
+
+<p class="small">
+تاریخچه مرورهای واقعی، برنامه‌ها و گزارش‌ها از یکدیگر جدا هستند.
+حذف یک برنامه باعث حذف سابقه مرور واقعی صفحه نمی‌شود.
+</p>
+
+<div class="toolbar">
+<div>
+<label>جست‌وجو</label>
+<input id="hSearch" placeholder="صفحه، نوع، توضیح..." oninput="renderHistory()">
+</div>
+<div>
+<label>از تاریخ</label>
+<input id="hFrom" placeholder="1405/05/01" oninput="renderHistory()">
+</div>
+<div>
+<label>تا تاریخ</label>
+<input id="hTo" placeholder="1405/05/31" oninput="renderHistory()">
+</div>
+<div>
+<label>نوع</label>
+<select id="hType" onchange="renderHistory()">
+<option value="all">همه</option>
+<option value="plan">برنامه</option>
+<option value="review">مرور واقعی</option>
+<option value="daily">گزارش روزانه</option>
+<option value="weekly">گزارش هفتگی</option>
+<option value="monthly">گزارش ماهانه</option>
+</select>
+</div>
+</div>
+
+<br>
+
+<div class="grid">
+<div class="stat">کل سوابق<strong id="hTotal">0</strong></div>
+<div class="stat">برنامه‌ها<strong id="hPlans">0</strong></div>
+<div class="stat">مرورها<strong id="hReviews">0</strong></div>
+<div class="stat">گزارش‌ها<strong id="hReports">0</strong></div>
+</div>
+</div>
+
+<div class="card">
+<div id="historyList"></div>
+</div>
+
+</section>
+
+<!-- BACKUP -->
+<section id="backup" class="page">
+
+<div class="card">
+<h2>پشتیبان‌گیری و مدیریت اطلاعات</h2>
+<p>برای حفظ اطلاعات، مرتباً نسخه پشتیبان دریافت کن.</p>
+
+<button class="btn primary" onclick="exportDB()">دانلود نسخه پشتیبان</button>
+
+<br><br>
+
+<label>بازیابی نسخه پشتیبان</label>
+<input type="file" accept=".json" onchange="importDB(event)">
+
+<br><br>
+
+<button class="btn danger" onclick="clearDB()">حذف کامل اطلاعات</button>
+</div>
+</section>
+
+</div>
+
+<script>
+/* ================================
+   DATABASE
+================================ */
+
+const KEY="QURAN_PERMANENT_SYSTEM_V6";
+
+let db={
+plans:[],
+daily:[],
+weekly:[],
+monthly:[],
+pages:{},
+seq:1
+};
+
+let selectedPage=null;
+let selectedCalendarDate=null;
+
+/* ================================
+   LOAD / SAVE
+================================ */
+
+function load(){
+try{
+let x=localStorage.getItem(KEY);
+if(x)db=JSON.parse(x);
+}catch(e){alert("خطا در خواندن اطلاعات");}
+
+db.plans=db.plans||[];
+db.daily=db.daily||[];
+db.weekly=db.weekly||[];
+db.monthly=db.monthly||[];
+db.pages=db.pages||{};
+db.seq=db.seq||1;
+}
+
+function save(){
+localStorage.setItem(KEY,JSON.stringify(db));
+}
+
+/* ================================
+   SHAMSI CALENDAR
+================================ */
+
+function div(a,b){return Math.floor(a/b)}
+
+function gregorianToJalali(gy,gm,gd){
+let gdm=[0,31,59,90,120,151,181,212,243,273,304,334];
+let gy2=gy+(gm>2?1:0);
+let days=355666+365*gy+div(gy2+3,4)-div(gy2+99,100)+div(gy2+399,400)+gd+gdm[gm-1];
+let jy=-1595+33*div(days,12053);
+days%=12053;
+jy+=4*div(days,1461);
+days%=1461;
+if(days>365){
+jy+=div(days-1,365);
+days=(days-1)%365;
+}
+let jm=days<186?1+div(days,31):7+div(days-186,30);
+let jd=1+(days<186?days%31:(days-186)%30);
+return [jy,jm,jd];
+}
+
+function jalaliToGregorian(jy,jm,jd){
+jy+=1595;
+let days=-355668+365*jy+div(jy,33)*8+div((jy%33)+3,4)+jd;
+if(jm<7)days+=(jm-1)*31;
+else days+=(jm-7)*30+186;
+
+let gy=400*div(days,146097);
+days%=146097;
+
+if(days>36524){
+gy+=100*div(--days,36524);
+days%=36524;
+if(days>=365)days++;
+}
+
+gy+=4*div(days,1461);
+days%=1461;
+
+if(days>365){
+gy+=div(days-1,365);
+days=(days-1)%365;
+}
+
+let gd=days+1;
+let sal=[0,31,(gy%4===0&&(gy%100!==0||gy%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];
+let gm=1;
+while(gd>sal[gm]){
+gd-=sal[gm++];
+}
+return [gy,gm,gd];
+}
+
+function todayJ(){
+let d=new Date();
+let j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());
+return j[0]+"/"+pad(j[1])+"/"+pad(j[2]);
+}
+
+function pad(n){return String(n).padStart(2,"0")}
+
+function validJDate(s){
+return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(s||"");
+}
+
+function normDate(s){
+if(!s)return "";
+let p=s.split("/");
+if(p.length!==3)return s;
+return p[0]+"/"+pad(p[1])+ "/" +pad(p[2]);
+}
+
+function compareDate(a,b){
+return a.localeCompare(b);
+}
+
+function currentJParts(){
+let d=todayJ().split("/").map(Number);
+return d;
+}
+
+function jalaliWeekDay(y,m,d){
+let g=jalaliToGregorian(y,m,d);
+let date=new Date(g[0],g[1]-1,g[2]);
+return date.getDay();
+}
+
+/*
+JavaScript:
+0 Sunday
+1 Monday
+...
+6 Saturday
+
+Calendar is Saturday-first:
+Saturday=0
+Sunday=1
+...
+Friday=6
+*/
+function satIndex(y,m,d){
+return (jalaliWeekDay(y,m,d)+1)%7;
+}
+
+function monthDays(y,m){
+if(m<=6)return 31;
+if(m<=11)return 30;
+return isJalaliLeap(y)?30:29;
+}
+
+function isJalaliLeap(y){
+let g=jalaliToGregorian(y,12,30);
+let back=gregorianToJalali(g[0],g[1],g[2]);
+return back[2]===30;
+}
+
+/* ================================
+   NAVIGATION
+================================ */
+
+function show(id,btn){
+document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+if(btn)btn.classList.add("active");
+refresh();
+}
+
+/* ================================
+   PLAN
+================================ */
+
+function addPlan(){
+
+let date=normDate(document.getElementById("pDate").value.trim());
+
+if(!validJDate(date)){
+alert("تاریخ را به شکل 1405/05/20 وارد کن.");
+return;
+}
+
+let page=Number(document.getElementById("pPage").value);
+
+if(page<1||page>604){
+alert("شماره صفحه باید بین 1 تا 604 باشد.");
+return;
+}
+
+let plan={
+id:db.seq++,
+date,
+page,
+type:document.getElementById("pType").value,
+priority:document.getElementById("pPriority").value,
+note:document.getElementById("pNote").value.trim(),
+status:"pending",
+createdAt:todayJ()
+};
+
+db.plans.push(plan);
+save();
+
+alert("برنامه ثبت شد.");
+clearPlanForm();
+refresh();
+}
+
+function clearPlanForm(){
+document.getElementById("pDate").value=todayJ();
+document.getElementById("pPage").value="";
+document.getElementById("pNote").value="";
+}
+
+function planStatus(p){
+if(p.status==="done")return"done";
+if(p.status==="cancelled")return"cancelled";
+if(compareDate(p.date,todayJ())<0)return"late";
+return"pending";
+}
+
+function statusText(s){
+return{
+done:"انجام‌شده",
+pending:"انجام‌نشده",
+late:"عقب‌افتاده",
+cancelled:"لغوشده"
+}[s]||s;
+}
+
+function statusBadge(s){
+return `<span class="badge ${s}">${statusText(s)}</span>`;
+}
+
+function completePlan(id){
+let p=db.plans.find(x=>x.id===id);
+if(!p)return;
+p.status=p.status==="done"?"pending":"done";
+p.completedAt=p.status==="done"?todayJ():null;
+save();
+refresh();
+}
+
+function cancelPlan(id){
+let p=db.plans.find(x=>x.id===id);
+if(!p)return;
+p.status=p.status==="cancelled"?"pending":"cancelled";
+save();
+refresh();
+}
+
+function deletePlan(id){
+if(!confirm("این برنامه حذف شود؟ سابقه مرورهای واقعی حذف نخواهد شد."))return;
+db.plans=db.plans.filter(x=>x.id!==id);
+save();
+refresh();
+}
+
+function editPlan(id){
+let p=db.plans.find(x=>x.id===id);
+if(!p)return;
+
+let date=prompt("تاریخ شمسی:",p.date);
+if(date===null)return;
+date=normDate(date);
+
+if(!validJDate(date)){
+alert("تاریخ نامعتبر است.");
+return;
+}
+
+let page=prompt("شماره صفحه:",p.page);
+if(page===null)return;
+
+let note=prompt("توضیح:",p.note||"");
+if(note===null)return;
+
+p.date=date;
+p.page=Number(page);
+p.note=note;
+
+save();
+refresh();
+}
+
+/* ================================
+   PLAN TABLE
+================================ */
+
+function planRow(p){
+let s=planStatus(p);
+
+return `
+<tr>
+<td>${p.date}</td>
+<td>${p.page}</td>
+<td>جزء ${getJuz(p.page)}</td>
+<td>${escape(p.type)}</td>
+<td>${escape(p.priority)}</td>
+<td>${statusBadge(s)}</td>
+<td>${escape(p.note||"-")}</td>
+<td>
+<div class="actions">
+<button class="btn secondary" onclick="completePlan(${p.id})">
+${p.status==="done"?"برگردان":"انجام شد"}
+</button>
+<button class="btn warning" onclick="editPlan(${p.id})">ویرایش</button>
+<button class="btn secondary" onclick="cancelPlan(${p.id})">
+${p.status==="cancelled"?"فعال کن":"لغو"}
+</button>
+<button class="btn danger" onclick="deletePlan(${p.id})">حذف</button>
+</div>
+</td>
+</tr>`;
+}
+
+function renderPlans(){
+
+let date=document.getElementById("planFilterDate").value.trim();
+let status=document.getElementById("planFilterStatus").value;
+let page=Number(document.getElementById("planFilterPage").value);
+
+let arr=db.plans.filter(p=>{
+let s=planStatus(p);
+return (!date||p.date===normDate(date)) &&
+(status==="all"||s===status) &&
+(!page||p.page===page);
+});
+
+arr.sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+
+if(!arr.length){
+document.getElementById("plansList").innerHTML='<div class="empty">برنامه‌ای پیدا نشد.</div>';
+return;
+}
+
+document.getElementById("plansList").innerHTML=`
+<div style="overflow:auto">
+<table>
+<thead>
+<tr>
+<th>تاریخ</th><th>صفحه</th><th>جزء</th><th>نوع</th>
+<th>اولویت</th><th>وضعیت</th><th>توضیح</th><th>عملیات</th>
+</tr>
+</thead>
+<tbody>${arr.map(planRow).join("")}</tbody>
+</table>
+</div>`;
+}
+
+/* ================================
+   DASHBOARD
+================================ */
+
+function dashboard(){
+
+let t=todayJ();
+let todayPlans=db.plans.filter(p=>p.date===t);
+let done=todayPlans.filter(p=>p.status==="done").length;
+let late=db.plans.filter(p=>planStatus(p)==="late").length;
+let reviews=Object.values(db.pages).reduce((n,p)=>n+(p.reviews||[]).length,0);
+
+document.getElementById("dToday").textContent=todayPlans.length;
+document.getElementById("dDone").textContent=done;
+document.getElementById("dPending").textContent=todayPlans.filter(p=>planStatus(p)==="pending").length;
+document.getElementById("dLate").textContent=late;
+document.getElementById("dPlans").textContent=db.plans.length;
+document.getElementById("dReviews").textContent=reviews;
+
+let box=document.getElementById("dashboardToday");
+
+if(!todayPlans.length){
+box.innerHTML='<div class="empty">برای امروز برنامه‌ای ثبت نشده است.</div>';
+}else{
+box.innerHTML=`
+<table>
+<tr><th>صفحه</th><th>نوع</th><th>وضعیت</th><th>عملیات</th></tr>
+${todayPlans.map(p=>`
+<tr>
+<td>${p.page}</td>
+<td>${escape(p.type)}</td>
+<td>${statusBadge(planStatus(p))}</td>
+<td>
+<button class="btn secondary" onclick="completePlan(${p.id})">
+${p.status==="done"?"برگردان":"انجام شد"}
+</button>
+<button class="btn warning" onclick="openPageFile(${p.page})">پرونده صفحه</button>
+</td>
+</tr>`).join("")}
+</table>`;
+}
+
+let cm=currentJParts();
+document.getElementById("dashMonth").value=cm[0]+"/"+pad(cm[1]);
+renderDashCalendar();
+}
+
+/* ================================
+   CALENDAR
+================================ */
+
+function renderCalendar(){
+
+let y=Number(document.getElementById("calYear").value);
+let m=Number(document.getElementById("calMonth").value);
+
+if(!y||m<1||m>12)return;
+
+let days=monthDays(y,m);
+let start=satIndex(y,m,1);
+let cells=[];
+
+for(let i=0;i<start;i++)cells.push(`<div class="cal-day other"></div>`);
+
+for(let d=1;d<=days;d++){
+let date=y+"/"+pad(m)+"/"+pad(d);
+let count=db.plans.filter(p=>p.date===date).length;
+let done=db.plans.filter(p=>p.date===date&&p.status==="done").length;
+let today=date===todayJ();
+
+cells.push(`
+<div class="cal-day ${today?"today":""}" onclick="selectCalendarDate('${date}')">
+<div class="cal-num">${d}</div>
+<div class="cal-count">
+${count?`📌 ${count} برنامه<br>✓ ${done} انجام‌شده`:"بدون برنامه"}
+</div>
+</div>`);
+}
+
+document.getElementById("calendarBox").innerHTML=`
+<div class="calendar">
+<div class="cal-head">شنبه</div>
+<div class="cal-head">یکشنبه</div>
+<div class="cal-head">دوشنبه</div>
+<div class="cal-head">سه‌شنبه</div>
+<div class="cal-head">چهارشنبه</div>
+<div class="cal-head">پنجشنبه</div>
+<div class="cal-head">جمعه</div>
+${cells.join("")}
+</div>`;
+}
+
+function selectCalendarDate(date){
+selectedCalendarDate=date;
+document.getElementById("selectedDateTitle").textContent="برنامه‌های "+date;
+let arr=db.plans.filter(p=>p.date===date);
+
+if(!arr.length){
+document.getElementById("selectedDatePlans").innerHTML='<div class="empty">برنامه‌ای برای این تاریخ وجود ندارد.</div>';
+return;
+}
+
+document.getElementById("selectedDatePlans").innerHTML=`
+<table>
+<tr><th>صفحه</th><th>نوع</th><th>وضعیت</th><th>توضیح</th><th>عملیات</th></tr>
+${arr.map(p=>`
+<tr>
+<td>${p.page}</td>
+<td>${escape(p.type)}</td>
+<td>${statusBadge(planStatus(p))}</td>
+<td>${escape(p.note||"-")}</td>
+<td>
+<button class="btn secondary" onclick="completePlan(${p.id})">تغییر وضعیت</button>
+<button class="btn warning" onclick="editPlan(${p.id})">ویرایش</button>
+<button class="btn danger" onclick="deletePlan(${p.id})">حذف</button>
+</td>
+</tr>`).join("")}
+</table>`;
+}
+
+function goCurrentMonth(){
+let x=currentJParts();
+document.getElementById("calYear").value=x[0];
+document.getElementById("calMonth").value=x[1];
+renderCalendar();
+}
+
+function renderDashCalendar(){
+
+let v=document.getElementById("dashMonth").value;
+if(!/^\d{4}\/\d{1,2}$/.test(v))return;
+
+let [y,m]=v.split("/").map(Number);
+let days=monthDays(y,m);
+let start=satIndex(y,m,1);
+let cells=[];
+
+for(let i=0;i<start;i++)cells.push(`<div class="cal-day other"></div>`);
+
+for(let d=1;d<=days;d++){
+let date=y+"/"+pad(m)+"/"+pad(d);
+let count=db.plans.filter(p=>p.date===date).length;
+cells.push(`<div class="cal-day" onclick="jumpDate('${date}')">
+<b>${d}</b><div class="cal-count">${count?count+" برنامه":"-"}</div>
+</div>`);
+}
+
+document.getElementById("dashCalendar").innerHTML=`
+<div class="calendar">
+<div class="cal-head">شنبه</div><div class="cal-head">یکشنبه</div>
+<div class="cal-head">دوشنبه</div><div class="cal-head">سه‌شنبه</div>
+<div class="cal-head">چهارشنبه</div><div class="cal-head">پنجشنبه</div>
+<div class="cal-head">جمعه</div>${cells.join("")}
+</div>`;
+}
+
+function jumpDate(date){
+show("calendarPage");
+document.getElementById("calYear").value=date.split("/")[0];
+document.getElementById("calMonth").value=Number(date.split("/")[1]);
+renderCalendar();
+selectCalendarDate(date);
+}
+
+/* ================================
+   QURAN
+================================ */
+
+const JUZ=[
+1,22,42,62,82,102,122,142,162,182,
+202,222,242,262,282,302,322,342,362,382,
+402,422,442,462,482,502,522,542,562,582
+];
+
+function getJuz(page){
+for(let i=29;i>=0;i--){
+if(page>=JUZ[i])return i+1;
+}
+return 1;
+}
+
+function juzRange(j){
+return{
+start:JUZ[j-1],
+end:j===30?604:JUZ[j]-1
+};
+}
+
+function initJuz(){
+let s=document.getElementById("juzSelect");
+for(let i=1;i<=30;i++)
+s.innerHTML+=`<option value="${i}">جزء ${i}</option>`;
+renderJuz();
+}
+
+function renderJuz(){
+
+let j=Number(document.getElementById("juzSelect").value);
+let r=juzRange(j);
+
+document.getElementById("juzTitle").textContent=
+"جزء "+j+" | صفحات "+r.start+" تا "+r.end;
+
+let html="";
+for(let p=r.start;p<=r.end;p++){
+let file=createPage(p);
+let reviews=file.reviews.length;
+html+=`
+<div class="page-mini" onclick="openPageFile(${p})">
+<strong>${p}</strong>
+<small>${reviews} مرور</small>
+</div>`;
+}
+document.getElementById("juzPages").innerHTML=html;
+}
+
+function createPage(page){
+if(!db.pages[page]){
+db.pages[page]={
+page,
+juz:getJuz(page),
+reviews:[],
+ayat:[]
+};
+}
+return db.pages[page];
+}
+
+function openPageFile(page){
+
+page=Number(page);
+selectedPage=page;
+let f=createPage(page);
+
+document.getElementById("pageFile").style.display="block";
+document.getElementById("filePage").textContent=page;
+document.getElementById("fileJuz").textContent=getJuz(page);
+document.getElementById("fileReviews").textContent=f.reviews.length;
+document.getElementById("filePlans").textContent=db.plans.filter(p=>p.page===page).length;
+document.getElementById("fileAyat").textContent=f.ayat.length;
+
+document.getElementById("revDate").value=todayJ();
+renderReviewHistory();
+renderAyatList();
+
+document.getElementById("pageFile").scrollIntoView({behavior:"smooth"});
+}
+
+function searchQuranPage(){
+let p=Number(document.getElementById("pageSearch").value);
+if(p>=1&&p<=604){
+document.getElementById("juzSelect").value=getJuz(p);
+renderJuz();
+}
+}
+
+function saveReview(){
+
+if(!selectedPage)return;
+
+let date=normDate(document.getElementById("revDate").value);
+
+if(!validJDate(date)){
+alert("تاریخ را به شکل 1405/05/20 وارد کن.");
+return;
+}
+
+let f=createPage(selectedPage);
+
+f.reviews.push({
+id:db.seq++,
+date,
+type:document.getElementById("revType").value,
+status:document.getElementById("revStatus").value,
+errors:Number(document.getElementById("revErrors").value)||0,
+note:document.getElementById("revNote").value.trim()
+});
+
+save();
+
+document.getElementById("revNote").value="";
+document.getElementById("revErrors").value=0;
+
+openPageFile(selectedPage);
+renderHistory();
+}
+
+function deleteReview(id){
+
+if(!confirm("این مرور واقعی حذف شود؟"))return;
+
+let f=createPage(selectedPage);
+f.reviews=f.reviews.filter(x=>x.id!==id);
+
+save();
+openPageFile(selectedPage);
+}
+
+function editReview(id){
+
+let f=createPage(selectedPage);
+let r=f.reviews.find(x=>x.id===id);
+if(!r)return;
+
+let date=prompt("تاریخ:",r.date);
+if(date===null)return;
+
+let status=prompt("وضعیت:",r.status);
+if(status===null)return;
+
+let note=prompt("یادداشت:",r.note||"");
+if(note===null)return;
+
+r.date=normDate(date);
+r.status=status;
+r.note=note;
+
+save();
+openPageFile(selectedPage);
+}
+
+function renderReviewHistory(){
+
+let f=createPage(selectedPage);
+let arr=[...f.reviews].sort((a,b)=>b.date.localeCompare(a.date));
+
+if(!arr.length){
+document.getElementById("reviewHistory").innerHTML='<div class="empty">هنوز مروری ثبت نشده است.</div>';
+return;
+}
+
+document.getElementById("reviewHistory").innerHTML=`
+<div style="overflow:auto">
+<table>
+<tr>
+<th>تاریخ</th><th>نوع</th><th>وضعیت</th><th>خطا</th><th>یادداشت</th><th>عملیات</th>
+</tr>
+${arr.map(r=>`
+<tr>
+<td>${r.date}</td>
+<td>${escape(r.type)}</td>
+<td>${escape(r.status)}</td>
+<td>${r.errors}</td>
+<td>${escape(r.note||"-")}</td>
+<td>
+<button class="btn warning" onclick="editReview(${r.id})">ویرایش</button>
+<button class="btn danger" onclick="deleteReview(${r.id})">حذف</button>
+</td>
+</tr>`).join("")}
+</table>
+</div>`;
+}
+
+function addAyat(){
+
+if(!selectedPage)return;
+
+let no=document.getElementById("ayatNo").value.trim();
+let text=document.getElementById("ayatText").value.trim();
+
+if(!no||!text){
+alert("شماره و عبارت شروع آیه را وارد کن.");
+return;
+}
+
+let f=createPage(selectedPage);
+
+f.ayat.push({
+id:db.seq++,
+number:no,
+text,
+createdAt:todayJ()
+});
+
+save();
+
+document.getElementById("ayatNo").value="";
+document.getElementById("ayatText").value="";
+
+openPageFile(selectedPage);
+}
+
+function deleteAyat(id){
+
+let f=createPage(selectedPage);
+
+if(!confirm("این سرآیه حذف شود؟"))return;
+
+f.ayat=f.ayat.filter(x=>x.id!==id);
+
+save();
+openPageFile(selectedPage);
+}
+
+function renderAyatList(){
+
+let f=createPage(selectedPage);
+
+if(!f.ayat.length){
+document.getElementById("ayatList").innerHTML='<div class="empty">برای این صفحه سرآیه‌ای ثبت نشده است.</div>';
+return;
+}
+
+document.getElementById("ayatList").innerHTML=`
+<table>
+<tr><th>شماره</th><th>شروع آیه</th><th>تاریخ ثبت</th><th>عملیات</th></tr>
+${f.ayat.map(a=>`
+<tr>
+<td>${escape(a.number)}</td>
+<td>${escape(a.text)}</td>
+<td>${a.createdAt}</td>
+<td><button class="btn danger" onclick="deleteAyat(${a.id})">حذف</button></td>
+</tr>`).join("")}
+</table>`;
+}
+
+/* ================================
+   DAILY
+================================ */
+
+function saveDaily(){
+
+let date=normDate(document.getElementById("dailyDate").value);
+
+if(!validJDate(date)){
+alert("تاریخ نامعتبر است.");
+return;
+}
+
+let old=db.daily.find(x=>x.date===date);
+
+let item={
+id:old?old.id:db.seq++,
+date,
+cycleDay:Number(document.getElementById("cycleDay").value)||0,
+newPages:Number(document.getElementById("newPages").value)||0,
+minutes:Number(document.getElementById("minutes").value)||0,
+review:document.getElementById("rReview").checked,
+ayat:document.getElementById("rAyat").checked,
+mental:document.getElementById("rMental").checked,
+qamus:document.getElementById("rQamus").checked,
+text:document.getElementById("dailyText").value,
+weakness:document.getElementById("dailyWeakness").value
+};
+
+if(old)Object.assign(old,item);
+else db.daily.push(item);
+
+save();
+alert("گزارش روزانه ذخیره شد.");
+renderDaily();
+}
+
+function renderDaily(){
+
+let arr=[...db.daily].sort((a,b)=>b.date.localeCompare(a.date));
+
+if(!arr.length){
+document.getElementById("dailyList").innerHTML='<div class="empty">گزارشی وجود ندارد.</div>';
+return;
+}
+
+document.getElementById("dailyList").innerHTML=`
+<table>
+<tr><th>تاریخ</th><th>چرخه</th><th>صفحات</th><th>دقیقه</th><th>فعالیت‌ها</th><th>گزارش</th><th>عملیات</th></tr>
+${arr.map(x=>`
+<tr>
+<td>${x.date}</td>
+<td>${x.cycleDay}</td>
+<td>${x.newPages}</td>
+<td>${x.minutes}</td>
+<td>${[x.review&&"مرور",x.ayat&&"سرآیات",x.mental&&"ذهنی",x.qamus&&"قاموس"].filter(Boolean).join("، ")||"-"}</td>
+<td>${escape(x.text||"-")}</td>
+<td>
+<button class="btn danger" onclick="deleteDaily(${x.id})">حذف</button>
+</td>
+</tr>`).join("")}
+</table>`;
+}
+
+function deleteDaily(id){
+if(!confirm("گزارش حذف شود؟"))return;
+db.daily=db.daily.filter(x=>x.id!==id);
+save();
+renderDaily();
+}
+
+/* ================================
+   WEEKLY
+================================ */
+
+function saveWeekly(){
+
+let y=Number(document.getElementById("wYear").value);
+let w=Number(document.getElementById("wWeek").value);
+
+if(!y||!w)return alert("سال و هفته را وارد کن.");
+
+let old=db.weekly.find(x=>x.year===y&&x.week===w);
+
+let x={
+id:old?old.id:db.seq++,
+year:y,
+week:w,
+text:document.getElementById("wText").value,
+plan:document.getElementById("wPlan").value
+};
+
+if(old)Object.assign(old,x);
+else db.weekly.push(x);
+
+save();
+renderWeekly();
+alert("گزارش هفتگی ذخیره شد.");
+}
+
+function renderWeekly(){
+
+let arr=[...db.weekly].sort((a,b)=>b.year-a.year||b.week-a.week);
+
+document.getElementById("weeklyList").innerHTML=arr.length?
+`<table><tr><th>سال</th><th>هفته</th><th>گزارش</th><th>برنامه بعد</th><th>عملیات</th></tr>
+${arr.map(x=>`
+<tr>
+<td>${x.year}</td><td>${x.week}</td>
+<td>${escape(x.text||"-")}</td>
+<td>${escape(x.plan||"-")}</td>
+<td><button class="btn danger" onclick="deleteWeekly(${x.id})">حذف</button></td>
+</tr>`).join("")}</table>`
+:'<div class="empty">گزارشی وجود ندارد.</div>';
+}
+
+function deleteWeekly(id){
+if(!confirm("حذف شود؟"))return;
+db.weekly=db.weekly.filter(x=>x.id!==id);
+save();renderWeekly();
+}
+
+/* ================================
+   MONTHLY
+================================ */
+
+function saveMonthly(){
+
+let y=Number(document.getElementById("mYear").value);
+let m=Number(document.getElementById("mMonth").value);
+
+if(!y||m<1||m>12)return alert("سال و ماه معتبر وارد کن.");
+
+let old=db.monthly.find(x=>x.year===y&&x.month===m);
+
+let x={
+id:old?old.id:db.seq++,
+year:y,
+month:m,
+text:document.getElementById("mText").value,
+success:document.getElementById("mSuccess").value,
+correction:document.getElementById("mCorrection").value,
+goal:document.getElementById("mGoal").value
+};
+
+if(old)Object.assign(old,x);
+else db.monthly.push(x);
+
+save();
+renderMonthly();
+alert("گزارش ماهانه ذخیره شد.");
+}
+
+function renderMonthly(){
+
+let arr=[...db.monthly].sort((a,b)=>b.year-a.year||b.month-a.month);
+
+document.getElementById("monthlyList").innerHTML=arr.length?
+`<table><tr><th>سال</th><th>ماه</th><th>گزارش</th><th>موفقیت</th><th>اصلاح</th><th>هدف</th><th>عملیات</th></tr>
+${arr.map(x=>`
+<tr>
+<td>${x.year}</td><td>${x.month}</td>
+<td>${escape(x.text||"-")}</td>
+<td>${escape(x.success||"-")}</td>
+<td>${escape(x.correction||"-")}</td>
+<td>${escape(x.goal||"-")}</td>
+<td><button class="btn danger" onclick="deleteMonthly(${x.id})">حذف</button></td>
+</tr>`).join("")}</table>`
+:'<div class="empty">گزارشی وجود ندارد.</div>';
+}
+
+function deleteMonthly(id){
+if(!confirm("حذف شود؟"))return;
+db.monthly=db.monthly.filter(x=>x.id!==id);
+save();renderMonthly();
+}
+
+/* ================================
+   HISTORY
+================================ */
+
+function historyData(){
+
+let out=[];
+
+/* plans */
+db.plans.forEach(p=>{
+out.push({
+id:"p-"+p.id,
+type:"plan",
+date:p.date,
+page:p.page,
+title:"برنامه مرور",
+description:p.type+" | "+(p.note||""),
+status:planStatus(p),
+source:p
+});
+});
+
+/* reviews */
+Object.values(db.pages).forEach(f=>{
+(f.reviews||[]).forEach(r=>{
+out.push({
+id:"r-"+r.id,
+type:"review",
+date:r.date,
+page:f.page,
+title:"مرور واقعی",
+description:r.type+" | وضعیت: "+r.status+" | خطا: "+r.errors+" | "+(r.note||""),
+status:"review",
+source:r
+});
+});
+});
+
+/* daily */
+db.daily.forEach(x=>{
+out.push({
+id:"d-"+x.id,
+type:"daily",
+date:x.date,
+page:"",
+title:"گزارش روزانه",
+description:x.text||"",
+status:"report",
+source:x
+});
+});
+
+/* weekly */
+db.weekly.forEach(x=>{
+out.push({
+id:"w-"+x.id,
+type:"weekly",
+date:String(x.year)+"/"+pad(0+x.week),
+page:"",
+title:"گزارش هفتگی",
+description:x.text||"",
+status:"report",
+source:x
+});
+});
+
+/* monthly */
+db.monthly.forEach(x=>{
+out.push({
+id:"m-"+x.id,
+date:x.year+"/"+pad(x.month)+"/01",
+page:"",
+type:"monthly",
+title:"گزارش ماهانه",
+description:x.text||"",
+status:"report",
+source:x
+});
+});
+
+return out;
+}
+
+function renderHistory(){
+
+let q=(document.getElementById("hSearch").value||"").toLowerCase().trim();
+let from=normDate(document.getElementById("hFrom").value.trim());
+let to=normDate(document.getElementById("hTo").value.trim());
+let type=document.getElementById("hType").value;
+
+let arr=historyData().filter(x=>{
+
+let text=(x.date+" "+x.page+" "+x.title+" "+x.description).toLowerCase();
+
+return (!q||text.includes(q)) &&
+(!from||x.date>=from) &&
+(!to||x.date<=to) &&
+(type==="all"||x.type===type);
+});
+
+arr.sort((a,b)=>b.date.localeCompare(a.date));
+
+let all=historyData();
+
+document.getElementById("hTotal").textContent=all.length;
+document.getElementById("hPlans").textContent=all.filter(x=>x.type==="plan").length;
+document.getElementById("hReviews").textContent=all.filter(x=>x.type==="review").length;
+document.getElementById("hReports").textContent=all.filter(x=>["daily","weekly","monthly"].includes(x.type)).length;
+
+if(!arr.length){
+document.getElementById("historyList").innerHTML='<div class="empty">سابقه‌ای با این فیلتر پیدا نشد.</div>';
+return;
+}
+
+document.getElementById("historyList").innerHTML=`
+<div style="overflow:auto">
+<table>
+<tr>
+<th>تاریخ</th><th>نوع</th><th>صفحه</th><th>عنوان</th><th>شرح</th><th>وضعیت</th><th>عملیات</th>
+</tr>
+${arr.map(x=>`
+<tr>
+<td>${escape(x.date)}</td>
+<td>${historyType(x.type)}</td>
+<td>${x.page||"-"}</td>
+<td>${escape(x.title)}</td>
+<td>${escape(x.description||"-")}</td>
+<td>${x.type==="plan"?statusBadge(x.status):"ثبت‌شده"}</td>
+<td>${historyActions(x)}</td>
+</tr>`).join("")}
+</table>
+</div>`;
+}
+
+function historyType(t){
+return{
+plan:"برنامه",
+review:"مرور واقعی",
+daily:"روزانه",
+weekly:"هفتگی",
+monthly:"ماهانه"
+}[t]||t;
+}
+
+function historyActions(x){
+
+if(x.type==="plan"){
+return`
+<button class="btn secondary" onclick="completePlan(${x.source.id})">تغییر وضعیت</button>
+<button class="btn warning" onclick="editPlan(${x.source.id})">ویرایش</button>
+<button class="btn danger" onclick="deletePlan(${x.source.id})">حذف</button>`;
+}
+
+if(x.type==="review"){
+return`
+<button class="btn warning" onclick="openReviewFromHistory(${x.page},${x.source.id})">ویرایش</button>
+<button class="btn danger" onclick="deleteReviewFromHistory(${x.page},${x.source.id})">حذف</button>`;
+}
+
+if(x.type==="daily"){
+return`<button class="btn danger" onclick="deleteDaily(${x.source.id})">حذف</button>`;
+}
+
+if(x.type==="weekly"){
+return`<button class="btn danger" onclick="deleteWeekly(${x.source.id})">حذف</button>`;
+}
+
+if(x.type==="monthly"){
+return`<button class="btn danger" onclick="deleteMonthly(${x.source.id})">حذف</button>`;
+}
+
+return"";
+}
+
+function openReviewFromHistory(page,id){
+openPageFile(page);
+let r=createPage(page).reviews.find(x=>x.id===id);
+if(r){
+document.getElementById("revDate").value=r.date;
+document.getElementById("revType").value=r.type;
+document.getElementById("revStatus").value=r.status;
+document.getElementById("revErrors").value=r.errors;
+document.getElementById("revNote").value=r.note||"";
+}
+}
+
+function deleteReviewFromHistory(page,id){
+selectedPage=page;
+deleteReview(id);
+renderHistory();
+}
+
+/* ================================
+   BACKUP
+================================ */
+
+function exportDB(){
+
+let blob=new Blob(
+[JSON.stringify(db,null,2)],
+{type:"application/json"}
+);
+
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="quran-system-backup-"+todayJ().replaceAll("/","-")+".json";
+a.click();
+URL.revokeObjectURL(a.href);
+}
+
+function importDB(e){
+
+let file=e.target.files[0];
+if(!file)return;
+
+let reader=new FileReader();
+
+reader.onload=function(){
+
+try{
+
+let x=JSON.parse(reader.result);
+
+if(!x.plans||!x.pages){
+throw new Error();
+}
+
+db=x;
+save();
+refresh();
+
+alert("نسخه پشتیبان با موفقیت بازیابی شد.");
+
+}catch(err){
+alert("فایل پشتیبان معتبر نیست.");
+}
+};
+
+reader.readAsText(file);
+}
+
+function clearDB(){
+
+if(!confirm("تمام اطلاعات سیستم حذف شود؟ این عملیات قابل بازگشت نیست."))return;
+
+if(!confirm("مطمئنی؟ ابتدا نسخه پشتیبان بگیر."))return;
+
+localStorage.removeItem(KEY);
+
+location.reload();
+}
+
+/* ================================
+   UTIL
+================================ */
+
+function escape(x){
+return String(x??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
+
+/* ================================
+   REFRESH
+================================ */
+
+function refresh(){
+
+dashboard();
+renderPlans();
+renderCalendar();
+renderDaily();
+renderWeekly();
+renderMonthly();
+renderHistory();
+
+if(selectedPage)openPageFile(selectedPage);
+
+}
+
+/* ================================
+   INITIALIZE
+================================ */
+
+load();
+
+let cur=currentJParts();
+
+document.getElementById("pDate").value=todayJ();
+document.getElementById("dailyDate").value=todayJ();
+document.getElementById("revDate").value=todayJ();
+
+document.getElementById("wYear").value=cur[0];
+document.getElementById("mYear").value=cur[0];
+document.getElementById("mMonth").value=cur[1];
+
+document.getElementById("calYear").value=cur[0];
+document.getElementById("calMonth").value=cur[1];
+
+document.getElementById("dashMonth").value=cur[0]+"/"+pad(cur[1]);
+
+initJuz();
+refresh();
+
+</script>
+
+</body>
+</html>
