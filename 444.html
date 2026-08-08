@@ -1,0 +1,4269 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>سیستم دائمی مدیریت حفظ قرآن</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#f1f5f3;
+color:#26352f;
+font-family:Tahoma,Arial,sans-serif;
+line-height:1.8
+}
+
+header{
+background:#173f35;
+color:#fff;
+padding:25px 15px;
+text-align:center;
+box-shadow:0 3px 12px rgba(0,0,0,.15)
+}
+
+header h1{
+margin:0;
+font-size:25px
+}
+
+header p{
+margin:5px 0 0;
+opacity:.9
+}
+
+.container{
+max-width:1500px;
+margin:auto;
+padding:18px
+}
+
+nav{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-bottom:18px
+}
+
+nav button{
+border:0;
+background:#fff;
+color:#173f35;
+padding:11px 16px;
+border-radius:9px;
+cursor:pointer;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+font-family:inherit
+}
+
+nav button:hover,
+nav button.active{
+background:#173f35;
+color:#fff
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.card{
+background:#fff;
+border-radius:15px;
+padding:20px;
+margin-bottom:18px;
+box-shadow:0 3px 12px rgba(0,0,0,.07)
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:14px
+}
+
+label{
+display:block;
+font-weight:bold;
+margin-bottom:6px
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:10px;
+border:1px solid #ccd6d1;
+border-radius:8px;
+font-family:inherit;
+background:#fff
+}
+
+textarea{
+min-height:100px;
+resize:vertical
+}
+
+button{
+font-family:inherit;
+cursor:pointer
+}
+
+.primary{
+background:#173f35;
+color:#fff;
+border:0;
+padding:11px 18px;
+border-radius:8px
+}
+
+.secondary{
+background:#e7efeb;
+color:#173f35;
+border:0;
+padding:10px 15px;
+border-radius:8px
+}
+
+.warning{
+background:#c48722;
+color:#fff;
+border:0;
+padding:10px 15px;
+border-radius:8px
+}
+
+.danger{
+background:#9d3030;
+color:#fff;
+border:0;
+padding:10px 15px;
+border-radius:8px
+}
+
+.small{
+font-size:12px;
+color:#69766f
+}
+
+.stat{
+background:#eef5f2;
+padding:17px;
+border-radius:12px;
+text-align:center
+}
+
+.stat strong{
+display:block;
+font-size:27px;
+color:#173f35;
+margin-top:5px
+}
+
+.section-title{
+border-right:5px solid #173f35;
+padding-right:10px
+}
+
+.badge{
+display:inline-block;
+padding:4px 9px;
+border-radius:20px;
+font-size:11px;
+margin:2px
+}
+
+.badge.done{
+background:#dcefe0;
+color:#21652c
+}
+
+.badge.pending{
+background:#fff1d5;
+color:#8a5b00
+}
+
+.badge.late{
+background:#f7dddd;
+color:#8a2020
+}
+
+.badge.info{
+background:#e3edf7;
+color:#24547a
+}
+
+.progress{
+height:13px;
+background:#e2e8e5;
+border-radius:20px;
+overflow:hidden
+}
+
+.progress-bar{
+height:100%;
+background:#173f35;
+width:0
+}
+
+.action-row{
+display:flex;
+flex-wrap:wrap;
+gap:7px;
+margin-top:10px
+}
+
+.plan-card{
+border:1px solid #dce4e0;
+border-radius:11px;
+padding:14px;
+margin:9px 0;
+background:#fafcfb
+}
+
+.plan-card.done{
+border-right:5px solid #3d8a4b
+}
+
+.plan-card.late{
+border-right:5px solid #a72c2c
+}
+
+.plan-card.pending{
+border-right:5px solid #c48722
+}
+
+.plan-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap
+}
+
+table{
+width:100%;
+border-collapse:collapse
+}
+
+th,td{
+border:1px solid #d7dfdc;
+padding:8px;
+text-align:center
+}
+
+th{
+background:#173f35;
+color:#fff
+}
+
+tr:nth-child(even){
+background:#f8faf9
+}
+
+.empty{
+padding:25px;
+text-align:center;
+color:#718078
+}
+
+/* CALENDAR */
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:5px
+}
+
+.calendar-head{
+background:#173f35;
+color:#fff;
+padding:8px;
+text-align:center;
+border-radius:6px;
+font-size:12px
+}
+
+.calendar-day{
+min-height:105px;
+background:#f8faf9;
+border:1px solid #dce3df;
+border-radius:8px;
+padding:7px;
+cursor:pointer
+}
+
+.calendar-day:hover{
+background:#eaf1ee
+}
+
+.calendar-day.today{
+border:2px solid #173f35
+}
+
+.calendar-day.selected{
+box-shadow:0 0 0 3px #c48722 inset
+}
+
+.calendar-day.empty-day{
+background:transparent;
+border:0;
+cursor:default
+}
+
+.calendar-day-number{
+font-weight:bold;
+font-size:15px
+}
+
+.calendar-count{
+font-size:11px;
+margin-top:5px
+}
+
+.calendar-dot{
+display:inline-block;
+width:8px;
+height:8px;
+border-radius:50%;
+background:#c48722;
+margin-left:3px
+}
+
+/* QURAN */
+
+.page-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(105px,1fr));
+gap:8px
+}
+
+.page-mini{
+background:#f4f7f5;
+border:1px solid #dce4e0;
+padding:10px;
+border-radius:8px;
+text-align:center;
+cursor:pointer
+}
+
+.page-mini:hover{
+background:#e7efeb
+}
+
+.page-mini strong{
+display:block;
+font-size:20px;
+color:#173f35
+}
+
+.page-mini .count{
+font-size:11px
+}
+
+.page-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap
+}
+
+.page-number-big{
+font-size:34px;
+font-weight:bold;
+color:#173f35
+}
+
+.juz-box{
+background:#eef5f2;
+padding:10px 15px;
+border-radius:10px;
+text-align:center
+}
+
+.hidden{
+display:none!important
+}
+
+.history-item{
+border:1px solid #dce4e0;
+padding:14px;
+border-radius:10px;
+margin:8px 0;
+background:#fafcfb
+}
+
+.quick{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:10px
+}
+
+.quick button{
+padding:13px;
+border:0;
+border-radius:10px;
+background:#eef5f2;
+color:#173f35
+}
+
+.quick button:hover{
+background:#dcebe5
+}
+
+canvas{
+max-height:430px
+}
+
+@media(max-width:700px){
+
+.container{
+padding:10px
+}
+
+.calendar-day{
+min-height:80px
+}
+
+.calendar-count{
+font-size:9px
+}
+
+th,td{
+font-size:10px;
+padding:5px
+}
+
+header h1{
+font-size:20px
+}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>سیستم دائمی مدیریت حفظ، مرور و انس با قرآن</h1>
+<p>
+برنامه‌ریزی دائمی | مرور ۶۰۴ صفحه | سرآیات | گزارش روزانه، هفتگی و ماهانه
+</p>
+</header>
+
+<div class="container">
+
+<nav>
+
+<button class="active" onclick="showPage('dashboard',this)">
+داشبورد
+</button>
+
+<button onclick="showPage('planner',this)">
+برنامه‌ریزی
+</button>
+
+<button onclick="showPage('daily',this)">
+گزارش روزانه
+</button>
+
+<button onclick="showPage('weekly',this)">
+گزارش هفتگی
+</button>
+
+<button onclick="showPage('monthly',this)">
+گزارش ماهانه
+</button>
+
+<button onclick="showPage('quran',this)">
+۶۰۴ صفحه قرآن
+</button>
+
+<button onclick="showPage('history',this)">
+تاریخچه
+</button>
+
+<button onclick="showPage('backup',this)">
+پشتیبان
+</button>
+
+</nav>
+
+
+<!-- =====================================================
+DASHBOARD
+===================================================== -->
+
+<section id="dashboard" class="page active">
+
+<div class="card">
+
+<h2>داشبورد</h2>
+
+<div class="grid">
+
+<div class="stat">
+برنامه‌های امروز
+<strong id="dashToday">۰</strong>
+</div>
+
+<div class="stat">
+انجام‌شده امروز
+<strong id="dashDone">۰</strong>
+</div>
+
+<div class="stat">
+باقی‌مانده امروز
+<strong id="dashPending">۰</strong>
+</div>
+
+<div class="stat">
+عقب‌افتاده
+<strong id="dashLate">۰</strong>
+</div>
+
+<div class="stat">
+کل برنامه‌ها
+<strong id="dashAllPlans">۰</strong>
+</div>
+
+<div class="stat">
+کل مرورهای واقعی
+<strong id="dashReviews">۰</strong>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+چرخه دائمی
+</h2>
+
+<div class="grid">
+
+<div class="stat">
+ماه
+<strong id="cycleMonth">۱</strong>
+</div>
+
+<div class="stat">
+هفته
+<strong id="cycleWeek">۱</strong>
+</div>
+
+<div class="stat">
+روز ماه
+<strong id="cycleDay">۱</strong>
+</div>
+
+<div class="stat">
+روز کل چرخه
+<strong id="cycleTotal">۱</strong>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="plan-header">
+
+<h2>برنامه‌های امروز</h2>
+
+<button class="secondary"
+onclick="openPlannerToday()">
+مدیریت برنامه‌های امروز
+</button>
+
+</div>
+
+<div id="dashboardTodayPlans"></div>
+
+</div>
+
+
+<div class="card">
+
+<h2>دسترسی سریع</h2>
+
+<div class="quick">
+
+<button onclick="openPlannerToday()">
+📅 برنامه امروز
+</button>
+
+<button onclick="openDailyToday()">
+📝 گزارش امروز
+</button>
+
+<button onclick="openQuranPage()">
+📖 پرونده آخرین صفحه
+</button>
+
+<button onclick="showPageById('history')">
+🕘 تاریخچه
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>پیشرفت اجرای برنامه‌ها</h2>
+
+<div class="progress">
+<div class="progress-bar"
+id="dashboardProgress"></div>
+</div>
+
+<p id="dashboardProgressText"></p>
+
+</div>
+
+
+<div class="card">
+
+<h2>نمودار عملکرد</h2>
+
+<select id="chartType"
+onchange="renderChart()">
+
+<option value="status">
+وضعیت برنامه‌ها
+</option>
+
+<option value="activity">
+توزیع فعالیت‌ها
+</option>
+
+<option value="juz">
+مرورها بر اساس جزء
+</option>
+
+<option value="monthly">
+فعالیت ماه‌های اخیر
+</option>
+
+</select>
+
+<br><br>
+
+<canvas id="mainChart"></canvas>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+PLANNER
+===================================================== -->
+
+<section id="planner" class="page">
+
+<div class="card">
+
+<h2>برنامه‌ریزی دائمی</h2>
+
+<p class="small">
+هر برنامه در تاریخ خودش ذخیره می‌شود و تا زمانی که حذفش نکنی در سیستم باقی می‌ماند.
+</p>
+
+<div class="grid">
+
+<div>
+<label>تاریخ شمسی</label>
+<input id="plannerDateText"
+placeholder="مثلاً ۱۴۰۵/۰۵/۱۷">
+</div>
+
+<div>
+<label>شماره صفحه</label>
+<input id="planPage"
+type="number"
+min="1"
+max="604"
+placeholder="۱ تا ۶۰۴">
+</div>
+
+<div>
+<label>نوع برنامه</label>
+<select id="planType">
+
+<option>مرور معمولی</option>
+<option>بازیابی فعال</option>
+<option>مرور ذهنی</option>
+<option>سرآیات</option>
+<option>آزمون</option>
+<option>حفظ جدید</option>
+<option>قاموس قرآن</option>
+<option>سایر</option>
+
+</select>
+</div>
+
+<div>
+<label>اولویت</label>
+<select id="planPriority">
+
+<option>عادی</option>
+<option>مهم</option>
+<option>خیلی مهم</option>
+
+</select>
+</div>
+
+</div>
+
+<br>
+
+<label>توضیح برنامه</label>
+
+<textarea id="planNote"
+placeholder="توضیح دقیق کاری که باید انجام شود..."></textarea>
+
+<br>
+
+<button class="primary"
+onclick="addPlan()">
+افزودن برنامه
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>انتخاب تاریخ</h2>
+
+<div class="grid">
+
+<div>
+<label>روز</label>
+<select id="calendarDay"></select>
+</div>
+
+<div>
+<label>ماه</label>
+<select id="calendarMonth"></select>
+</div>
+
+<div>
+<label>سال</label>
+<input id="calendarYear" type="number">
+</div>
+
+</div>
+
+<br>
+
+<button class="primary"
+onclick="selectCalendarDate()">
+نمایش برنامه این تاریخ
+</button>
+
+<button class="secondary"
+onclick="setPlannerToday()">
+امروز
+</button>
+
+</div>
+
+
+<div class="card">
+
+<div class="plan-header">
+
+<h2 id="selectedDateTitle">
+برنامه‌های امروز
+</h2>
+
+<div>
+<span id="selectedDateBadge"
+class="badge info"></span>
+</div>
+
+</div>
+
+<div id="selectedDatePlans"></div>
+
+</div>
+
+
+<div class="card">
+
+<h2>تقویم شمسی</h2>
+
+<div class="grid">
+
+<div>
+<label>سال</label>
+<input id="calYear"
+type="number"
+onchange="renderCalendar()">
+</div>
+
+<div>
+<label>ماه</label>
+<select id="calMonth"
+onchange="renderCalendar()"></select>
+</div>
+
+</div>
+
+<br>
+
+<div class="calendar">
+
+<div class="calendar-head">شنبه</div>
+<div class="calendar-head">یکشنبه</div>
+<div class="calendar-head">دوشنبه</div>
+<div class="calendar-head">سه‌شنبه</div>
+<div class="calendar-head">چهارشنبه</div>
+<div class="calendar-head">پنجشنبه</div>
+<div class="calendar-head">جمعه</div>
+
+</div>
+
+<br>
+
+<div id="calendarGrid"
+class="calendar"></div>
+
+</div>
+
+
+<div class="card">
+
+<h2>برنامه‌های عقب‌افتاده</h2>
+
+<div id="latePlans"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+DAILY
+===================================================== -->
+
+<section id="daily" class="page">
+
+<div class="card">
+
+<h2>گزارش روزانه</h2>
+
+<div class="grid">
+
+<div>
+<label>تاریخ شمسی</label>
+<input id="dailyDate"
+placeholder="۱۴۰۵/۰۵/۱۷">
+</div>
+
+<div>
+<label>صفحات جدید</label>
+<input id="dailyNewPages"
+type="number"
+value="2">
+</div>
+
+<div>
+<label>مدت تمرین ـ دقیقه</label>
+<input id="dailyMinutes"
+type="number">
+</div>
+
+</div>
+
+<br>
+
+<div class="grid">
+
+<label>
+<input type="checkbox" id="dailyReview">
+مرور دوره‌ها
+</label>
+
+<label>
+<input type="checkbox" id="dailyAyat">
+مرور سرآیات
+</label>
+
+<label>
+<input type="checkbox" id="dailyMental">
+مرور ذهنی
+</label>
+
+<label>
+<input type="checkbox" id="dailyVocabulary">
+قاموس قرآن
+</label>
+
+</div>
+
+<br>
+
+<label>گزارش روز</label>
+
+<textarea id="dailyReport"
+placeholder="امروز چه اتفاقی افتاد؟"></textarea>
+
+<br>
+
+<label>نقطه ضعف</label>
+
+<input id="dailyWeakness">
+
+<br><br>
+
+<button class="primary"
+onclick="saveDaily()">
+ثبت گزارش
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>گزارش‌های روزانه ثبت‌شده</h2>
+
+<div id="dailyList"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+WEEKLY
+===================================================== -->
+
+<section id="weekly" class="page">
+
+<div class="card">
+
+<h2>گزارش هفتگی</h2>
+
+<div class="grid">
+
+<div>
+<label>سال</label>
+<input id="weeklyYear"
+type="number">
+</div>
+
+<div>
+<label>شماره هفته چرخه</label>
+<input id="weeklyNumber"
+type="number">
+</div>
+
+</div>
+
+<br>
+
+<div class="grid">
+
+<div class="stat">
+صفحات جدید
+<strong id="weeklyPages">۰</strong>
+</div>
+
+<div class="stat">
+روزهای فعال
+<strong id="weeklyDays">۰</strong>
+</div>
+
+<div class="stat">
+برنامه‌ها
+<strong id="weeklyPlans">۰</strong>
+</div>
+
+<div class="stat">
+انجام‌شده
+<strong id="weeklyDone">۰</strong>
+</div>
+
+</div>
+
+<br>
+
+<label>گزارش هفته</label>
+
+<textarea id="weeklyReport"></textarea>
+
+<br>
+
+<label>برنامه هفته آینده</label>
+
+<textarea id="weeklyPlan"></textarea>
+
+<br>
+
+<button class="primary"
+onclick="saveWeekly()">
+ثبت گزارش هفتگی
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>سوابق هفتگی</h2>
+
+<div id="weeklyList"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+MONTHLY
+===================================================== -->
+
+<section id="monthly" class="page">
+
+<div class="card">
+
+<h2>گزارش ماهانه</h2>
+
+<div class="grid">
+
+<div>
+<label>سال</label>
+<input id="monthlyYear"
+type="number">
+</div>
+
+<div>
+<label>ماه چرخه</label>
+<input id="monthlyNumber"
+type="number">
+</div>
+
+</div>
+
+<br>
+
+<div class="grid">
+
+<div class="stat">
+صفحات جدید
+<strong id="monthlyPages">۰</strong>
+</div>
+
+<div class="stat">
+کل برنامه‌ها
+<strong id="monthlyPlans">۰</strong>
+</div>
+
+<div class="stat">
+انجام‌شده
+<strong id="monthlyDone">۰</strong>
+</div>
+
+</div>
+
+<br>
+
+<label>گزارش ماه</label>
+
+<textarea id="monthlyReport"></textarea>
+
+<br>
+
+<label>موفقیت اصلی</label>
+
+<input id="monthlySuccess">
+
+<br><br>
+
+<label>مهم‌ترین اصلاح</label>
+
+<input id="monthlyCorrection">
+
+<br><br>
+
+<label>هدف ماه آینده</label>
+
+<textarea id="monthlyGoal"></textarea>
+
+<br>
+
+<button class="primary"
+onclick="saveMonthly()">
+ثبت گزارش ماهانه
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>سوابق ماهانه</h2>
+
+<div id="monthlyList"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+QURAN
+===================================================== -->
+
+<section id="quran" class="page">
+
+<div class="card">
+
+<h2>۶۰۴ صفحه قرآن ـ ۳۰ جزء</h2>
+
+<div class="grid">
+
+<div>
+<label>جزء</label>
+
+<select id="juzSelector"
+onchange="renderJuzPages()"></select>
+
+</div>
+
+<div>
+<label>شماره صفحه</label>
+
+<input id="pageSearch"
+type="number"
+min="1"
+max="604"
+oninput="searchQuranPage()">
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3 id="juzTitle">جزء ۱</h3>
+
+<div id="juzPages"
+class="page-grid"></div>
+
+</div>
+
+
+<div id="pageFile"
+class="card hidden">
+
+<div class="page-title">
+
+<div>
+
+<div class="small">
+پرونده دائمی صفحه
+</div>
+
+<div class="page-number-big"
+id="selectedPageNumber">
+صفحه ۱
+</div>
+
+</div>
+
+<div class="juz-box">
+جزء
+<strong id="selectedPageJuz">۱</strong>
+</div>
+
+<div class="juz-box">
+مرورها
+<strong id="selectedPageReviews">۰</strong>
+</div>
+
+<div class="juz-box">
+سرآیات
+<strong id="selectedPageAyat">۰</strong>
+</div>
+
+</div>
+
+
+<h3 class="section-title">
+برنامه‌های این صفحه
+</h3>
+
+<div id="pagePlans"></div>
+
+
+<h3 class="section-title">
+ثبت مرور واقعی
+</h3>
+
+<div class="grid">
+
+<div>
+<label>تاریخ شمسی</label>
+<input id="reviewDate"
+placeholder="۱۴۰۵/۰۵/۱۷">
+</div>
+
+<div>
+<label>نوع مرور</label>
+
+<select id="reviewType">
+
+<option>مرور معمولی</option>
+<option>بازیابی فعال</option>
+<option>مرور ذهنی</option>
+<option>آزمون</option>
+<option>حفظ</option>
+
+</select>
+
+</div>
+
+<div>
+<label>وضعیت</label>
+
+<select id="reviewStatus">
+
+<option>عالی</option>
+<option>خوب</option>
+<option>متوسط</option>
+<option>ضعیف</option>
+
+</select>
+
+</div>
+
+<div>
+<label>تعداد خطا</label>
+
+<input id="reviewErrors"
+type="number"
+value="0">
+
+</div>
+
+</div>
+
+<br>
+
+<label>یادداشت مرور</label>
+
+<textarea id="reviewNote"></textarea>
+
+<br>
+
+<button class="primary"
+onclick="savePageReview()">
+ثبت مرور واقعی
+</button>
+
+
+<h3 class="section-title">
+تاریخچه کامل مرور این صفحه
+</h3>
+
+<div id="pageReviewHistory"></div>
+
+
+<h3 class="section-title">
+سرآیات صفحه
+</h3>
+
+<div class="grid">
+
+<div>
+<label>شماره سرآیه</label>
+<input id="newAyatNumber">
+</div>
+
+<div>
+<label>عبارت آغاز آیه</label>
+<input id="newAyatText">
+</div>
+
+</div>
+
+<br>
+
+<button class="secondary"
+onclick="addPageAyat()">
+افزودن سرآیه
+</button>
+
+<div id="pageAyatList"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+HISTORY
+===================================================== -->
+
+<section id="history" class="page">
+
+<div class="card">
+
+<h2>تاریخچه دائمی</h2>
+
+<div class="grid">
+
+<div>
+<label>جست‌وجو</label>
+
+<input id="historySearch"
+oninput="renderHistory()"
+placeholder="صفحه، نوع، توضیح...">
+
+</div>
+
+<div>
+<label>تاریخ شمسی</label>
+
+<input id="historyDate"
+oninput="renderHistory()"
+placeholder="۱۴۰۵/۰۵/۱۷">
+
+</div>
+
+<div>
+<label>نوع</label>
+
+<select id="historyType"
+onchange="renderHistory()">
+
+<option value="">همه</option>
+<option value="plan">برنامه</option>
+<option value="review">مرور واقعی</option>
+<option value="daily">گزارش روزانه</option>
+<option value="weekly">گزارش هفتگی</option>
+<option value="monthly">گزارش ماهانه</option>
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+<div id="historyResults"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+BACKUP
+===================================================== -->
+
+<section id="backup" class="page">
+
+<div class="card">
+
+<h2>پشتیبان‌گیری</h2>
+
+<p>
+برای اینکه اطلاعات سال‌های آینده را از دست ندهی، مرتب نسخه پشتیبان تهیه کن.
+</p>
+
+<button class="primary"
+onclick="exportData()">
+دانلود پشتیبان
+</button>
+
+<br><br>
+
+<label>
+بازیابی پشتیبان
+</label>
+
+<input type="file"
+accept=".json"
+onchange="importData(event)">
+
+<br><br>
+
+<button class="danger"
+onclick="clearAllData()">
+حذف تمام اطلاعات
+</button>
+
+</div>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+DATABASE
+===================================================== */
+
+const STORAGE_KEY="QURAN_PERMANENT_SYSTEM_V6";
+
+let db={
+plans:[],
+daily:[],
+weekly:[],
+monthly:[],
+pages:{},
+settings:{
+lastPage:1
+}
+};
+
+let selectedPage=null;
+let selectedPlannerDate=null;
+let mainChart=null;
+
+
+/* =====================================================
+PERSIAN NUMBERS
+===================================================== */
+
+function faNum(n){
+
+return String(n)
+.replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+
+}
+
+function enNum(s){
+
+if(s===undefined || s===null)return "";
+
+return String(s)
+.replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+
+}
+
+
+/* =====================================================
+JALALI DATE FUNCTIONS
+===================================================== */
+
+function div(a,b){
+
+return Math.floor(a/b);
+}
+
+function jalaliToGregorian(jy,jm,jd){
+
+jy=Number(jy);
+jm=Number(jm);
+jd=Number(jd);
+
+let gy;
+
+if(jy>979){
+gy=1600;
+jy-=979;
+}else{
+gy=621;
+}
+
+let days=
+365*jy+
+div(jy,33)*8+
+div((jy%33)+3,4)+78+
+jd+
+(jm<7?(jm-1)*31:(jm-7)*30+186);
+
+gy+=400*div(days,146097);
+days%=146097;
+
+if(days>36524){
+gy+=100*div(--days,36524);
+days%=36524;
+
+if(days>=365){
+days++;
+}
+}
+
+gy+=4*div(days,1461);
+days%=1461;
+
+if(days>365){
+gy+=div(days-1,365);
+days=(days-1)%365;
+}
+
+let gd=days+1;
+
+const sal=[
+0,
+31,
+28,
+31,
+30,
+31,
+30,
+31,
+31,
+30,
+31,
+30,
+31
+];
+
+let leap=
+(gy%4===0 && gy%100!==0) ||
+gy%400===0;
+
+sal[2]=leap?29:28;
+
+let gm=1;
+
+while(gd>sal[gm]){
+gd-=sal[gm];
+gm++;
+}
+
+return{
+gy,
+gm,
+gd
+};
+
+}
+
+
+function gregorianToJalali(gy,gm,gd){
+
+gy=Number(gy);
+gm=Number(gm);
+gd=Number(gd);
+
+let g_d_m=[
+0,
+31,
+59,
+90,
+120,
+151,
+181,
+212,
+243,
+273,
+304,
+334
+];
+
+let jy;
+
+if(gy>1600){
+
+jy=979;
+gy-=1600;
+
+}else{
+
+jy=0;
+gy-=621;
+
+}
+
+let gy2=
+gm>2
+?gy+1
+:gy;
+
+let days=
+365*gy+
+div(gy2+3,4)-
+div(gy2+99,100)+
+div(gy2+399,400)-
+80+
+gd+
+g_d_m[gm-1];
+
+jy+=33*div(days,12053);
+days%=12053;
+
+jy+=4*div(days,1461);
+days%=1461;
+
+if(days>365){
+jy+=div(days-1,365);
+days=(days-1)%365;
+}
+
+let jd=days+1;
+
+let jm;
+
+if(jd<=186){
+jm=1+div(jd-1,31);
+jd=(jd-1)%31+1;
+}else{
+jm=7+div(jd-187,30);
+jd=(jd-187)%30+1;
+}
+
+return{
+jy,
+jm,
+jd
+};
+
+}
+
+
+/* =====================================================
+TODAY
+===================================================== */
+
+function nowJalali(){
+
+const d=new Date();
+
+return gregorianToJalali(
+d.getFullYear(),
+d.getMonth()+1,
+d.getDate()
+);
+
+}
+
+function jalaliString(j){
+
+return j.jy+"/"+String(j.jm).padStart(2,"0")+"/"+String(j.jd).padStart(2,"0");
+
+}
+
+function todayJ(){
+
+return jalaliString(nowJalali());
+
+}
+
+
+/* =====================================================
+DATE VALIDATION
+===================================================== */
+
+function normalizeJDate(value){
+
+if(!value)return null;
+
+value=enNum(value)
+.trim()
+.replace(/-/g,"/")
+.replace(/\./g,"/");
+
+const p=value.split("/");
+
+if(p.length!==3)return null;
+
+const y=Number(p[0]);
+const m=Number(p[1]);
+const d=Number(p[2]);
+
+if(!y||m<1||m>12||d<1||d>31)return null;
+
+if(m>6 && d>30)return null;
+
+if(m===12 && d>30)return null;
+
+return y+"/"+String(m).padStart(2,"0")+"/"+String(d).padStart(2,"0");
+
+}
+
+
+/* =====================================================
+DATE COMPARISON
+===================================================== */
+
+function dateCompare(a,b){
+
+if(a===b)return 0;
+
+return a<b?-1:1;
+
+}
+
+
+/* =====================================================
+CYCLE
+===================================================== */
+
+function getCycle(day){
+
+day=Math.max(1,Number(day)||1);
+
+return{
+
+totalDay:day,
+
+month:Math.floor((day-1)/28)+1,
+
+dayOfMonth:((day-1)%28)+1,
+
+week:Math.floor(((day-1)%28)/7)+1,
+
+dayOfWeek:((day-1)%7)+1
+
+};
+
+}
+
+
+/* =====================================================
+JUZ
+===================================================== */
+
+const JUZ_STARTS=[
+1,22,42,62,82,102,122,142,162,182,
+202,222,242,262,282,302,322,342,362,382,
+402,422,442,462,482,502,522,542,562,582
+];
+
+function getJuz(page){
+
+page=Number(page);
+
+for(let i=29;i>=0;i--){
+
+if(page>=JUZ_STARTS[i]){
+return i+1;
+}
+
+}
+
+return 1;
+
+}
+
+function getJuzRange(juz){
+
+return{
+
+start:JUZ_STARTS[juz-1],
+
+end:juz===30
+?604
+:JUZ_STARTS[juz]-1
+
+};
+
+}
+
+
+/* =====================================================
+LOAD / SAVE
+===================================================== */
+
+function loadDB(){
+
+const raw=
+localStorage.getItem(STORAGE_KEY);
+
+if(raw){
+
+try{
+db=JSON.parse(raw);
+}catch(e){
+console.error(e);
+}
+
+}
+
+if(!db.plans)db.plans=[];
+if(!db.daily)db.daily=[];
+if(!db.weekly)db.weekly=[];
+if(!db.monthly)db.monthly=[];
+if(!db.pages)db.pages={};
+if(!db.settings)db.settings={lastPage:1};
+
+}
+
+function saveDB(){
+
+localStorage.setItem(
+STORAGE_KEY,
+JSON.stringify(db)
+);
+
+}
+
+
+/* =====================================================
+ESCAPE
+===================================================== */
+
+function esc(v){
+
+return String(v??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================================
+NAVIGATION
+===================================================== */
+
+function showPage(id,btn){
+
+document.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("active"));
+
+document.getElementById(id)
+.classList.add("active");
+
+document.querySelectorAll("nav button")
+.forEach(b=>b.classList.remove("active"));
+
+if(btn)btn.classList.add("active");
+
+refreshAll();
+
+}
+
+function showPageById(id){
+
+const btn=
+[...document.querySelectorAll("nav button")]
+.find(x=>
+x.getAttribute("onclick") &&
+x.getAttribute("onclick").includes("'"+id+"'")
+);
+
+showPage(id,btn);
+
+}
+
+
+/* =====================================================
+PAGE RECORD
+===================================================== */
+
+function getPageRecord(page){
+
+page=Number(page);
+
+if(!db.pages[page]){
+
+db.pages[page]={
+page:page,
+juz:getJuz(page),
+reviews:[],
+ayat:[]
+};
+
+}
+
+return db.pages[page];
+
+}
+
+
+/* =====================================================
+PLAN STATUS
+===================================================== */
+
+function planStatus(plan){
+
+if(plan.status==="done")
+return"done";
+
+if(plan.status==="cancelled")
+return"cancelled";
+
+if(dateCompare(plan.date,todayJ())<0)
+return"late";
+
+return"pending";
+
+}
+
+
+/* =====================================================
+ADD PLAN
+===================================================== */
+
+function addPlan(){
+
+const date=
+normalizeJDate(
+document.getElementById("plannerDateText").value
+);
+
+if(!date){
+
+alert("تاریخ شمسی صحیح وارد کنید. مثال: ۱۴۰۵/۰۵/۱۷");
+return;
+
+}
+
+const page=
+Number(document.getElementById("planPage").value||0);
+
+if(page<1||page>604){
+
+alert("شماره صفحه باید بین ۱ تا ۶۰۴ باشد.");
+return;
+
+}
+
+const plan={
+
+id:Date.now()+"_"+Math.random(),
+
+date,
+
+page,
+
+type:document.getElementById("planType").value,
+
+priority:document.getElementById("planPriority").value,
+
+note:document.getElementById("planNote").value,
+
+status:"pending",
+
+createdAt:new Date().toISOString()
+
+};
+
+db.plans.push(plan);
+
+saveDB();
+
+document.getElementById("plannerDateText").value=date;
+
+document.getElementById("planNote").value="";
+
+loadSelectedDate(date);
+
+refreshAll();
+
+alert("برنامه با موفقیت ثبت شد.");
+
+}
+
+
+/* =====================================================
+PLAN EDIT
+===================================================== */
+
+function editPlan(id){
+
+const p=db.plans.find(x=>x.id===id);
+
+if(!p)return;
+
+const date=
+prompt("تاریخ شمسی:",p.date);
+
+if(!date)return;
+
+const nd=normalizeJDate(date);
+
+if(!nd){
+
+alert("تاریخ صحیح نیست.");
+return;
+
+}
+
+const page=
+prompt("شماره صفحه:",p.page);
+
+if(!page)return;
+
+p.date=nd;
+p.page=Number(page);
+
+p.type=
+prompt("نوع برنامه:",p.type)
+||p.type;
+
+p.note=
+prompt("توضیح برنامه:",p.note)
+??p.note;
+
+saveDB();
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+DELETE PLAN
+===================================================== */
+
+function deletePlan(id){
+
+if(!confirm("این برنامه حذف شود؟"))
+return;
+
+db.plans=
+db.plans.filter(p=>p.id!==id);
+
+saveDB();
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+PLAN TO DONE
+===================================================== */
+
+function completePlan(id){
+
+const p=db.plans.find(x=>x.id===id);
+
+if(!p)return;
+
+p.status="done";
+
+p.completedAt=new Date().toISOString();
+
+saveDB();
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+CANCEL PLAN
+===================================================== */
+
+function cancelPlan(id){
+
+const p=db.plans.find(x=>x.id===id);
+
+if(!p)return;
+
+p.status="cancelled";
+
+saveDB();
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+OPEN PLANNER
+===================================================== */
+
+function openPlannerToday(){
+
+showPageById("planner");
+
+setPlannerToday();
+
+}
+
+function setPlannerToday(){
+
+const t=todayJ();
+
+document.getElementById("plannerDateText").value=t;
+
+loadSelectedDate(t);
+
+}
+
+function loadSelectedDate(date){
+
+selectedPlannerDate=date;
+
+document.getElementById("selectedDateTitle")
+.innerText=
+"برنامه‌های "+faNum(date);
+
+const plans=
+db.plans.filter(p=>p.date===date);
+
+document.getElementById("selectedDateBadge")
+.innerText=
+faNum(plans.length)+" برنامه";
+
+renderSelectedPlans(plans);
+
+}
+
+
+function renderSelectedPlans(plans){
+
+const box=
+document.getElementById("selectedDatePlans");
+
+if(!plans.length){
+
+box.innerHTML=
+'<div class="empty">برای این تاریخ برنامه‌ای ثبت نشده است.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+plans.map(planHTML).join("");
+
+}
+
+
+function planHTML(p){
+
+const status=planStatus(p);
+
+let cls=status;
+
+let label=
+status==="done"
+?"انجام‌شده":
+status==="late"
+?"عقب‌افتاده":
+status==="cancelled"
+?"لغوشده":
+"انجام‌نشده";
+
+return`
+
+<div class="plan-card ${cls}">
+
+<div class="plan-header">
+
+<div>
+<strong>
+صفحه ${faNum(p.page)}
+</strong>
+
+<span class="badge info">
+${esc(p.type)}
+</span>
+
+<span class="badge">
+${esc(p.priority)}
+</span>
+
+<span class="badge ${status}">
+${label}
+</span>
+
+</div>
+
+<div class="small">
+${faNum(p.date)}
+</div>
+
+</div>
+
+<p>
+${esc(p.note||"بدون توضیح")}
+</p>
+
+<div class="action-row">
+
+${
+status!=="done"
+?`
+<button class="primary"
+onclick="completePlan('${p.id}')">
+✓ انجام شد
+</button>
+`
+:""
+}
+
+<button class="secondary"
+onclick="editPlan('${p.id}')">
+ویرایش
+</button>
+
+<button class="secondary"
+onclick="openQuranSpecific(${p.page})">
+پرونده صفحه
+</button>
+
+<button class="danger"
+onclick="deletePlan('${p.id}')">
+حذف
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+CALENDAR SELECT
+===================================================== */
+
+function initCalendarSelectors(){
+
+const j=nowJalali();
+
+const month=
+document.getElementById("calMonth");
+
+month.innerHTML="";
+
+const names=[
+"فروردین",
+"اردیبهشت",
+"خرداد",
+"تیر",
+"مرداد",
+"شهریور",
+"مهر",
+"آبان",
+"آذر",
+"دی",
+"بهمن",
+"اسفند"
+];
+
+names.forEach((x,i)=>{
+
+month.innerHTML+=
+`<option value="${i+1}">${x}</option>`;
+
+});
+
+month.value=j.jm;
+
+document.getElementById("calYear").value=j.jy;
+
+const m=
+document.getElementById("calendarMonth");
+
+m.innerHTML=
+names.map((x,i)=>
+`<option value="${i+1}">${x}</option>`
+).join("");
+
+m.value=j.jm;
+
+document.getElementById("calendarYear").value=j.jy;
+
+}
+
+
+/* =====================================================
+MONTH DAYS
+===================================================== */
+
+function jalaliMonthDays(y,m){
+
+if(m<=6)return 31;
+
+if(m<=11)return 30;
+
+const g=jalaliToGregorian(y,12,1);
+
+const next=jalaliToGregorian(y+1,1,1);
+
+const a=
+new Date(g.gy,g.gm-1,g.gd);
+
+const b=
+new Date(next.gy,next.gm-1,next.gd);
+
+return Math.round((b-a)/86400000);
+
+}
+
+
+/* =====================================================
+CALENDAR
+===================================================== */
+
+function renderCalendar(){
+
+const y=
+Number(document.getElementById("calYear").value);
+
+const m=
+Number(document.getElementById("calMonth").value);
+
+if(!y||!m)return;
+
+const grid=
+document.getElementById("calendarGrid");
+
+grid.innerHTML="";
+
+const first=
+jalaliToGregorian(y,m,1);
+
+const gdate=
+new Date(
+first.gy,
+first.gm-1,
+first.gd
+);
+
+let weekday=
+gdate.getDay();
+
+weekday=
+(weekday+1)%7;
+
+for(let i=0;i<weekday;i++){
+
+grid.innerHTML+=
+`<div class="calendar-day empty-day"></div>`;
+
+}
+
+const days=jalaliMonthDays(y,m);
+
+for(let d=1;d<=days;d++){
+
+const date=
+y+"/"+String(m).padStart(2,"0")+
+"/"+String(d).padStart(2,"0");
+
+const plans=
+db.plans.filter(p=>p.date===date);
+
+const done=
+plans.filter(p=>p.status==="done").length;
+
+const late=
+plans.filter(p=>planStatus(p)==="late").length;
+
+let dots="";
+
+if(plans.length)
+dots+=`<span class="calendar-dot"></span>`;
+
+const todayClass=
+date===todayJ()
+?"today":"";
+
+const selectedClass=
+date===selectedPlannerDate
+?"selected":"";
+
+grid.innerHTML+=`
+
+<div class="calendar-day ${todayClass} ${selectedClass}"
+onclick="calendarChoose('${date}')">
+
+<div class="calendar-day-number">
+${faNum(d)}
+</div>
+
+<div class="calendar-count">
+${dots}
+${faNum(plans.length)} برنامه
+</div>
+
+${
+done
+?`<span class="badge done">${faNum(done)} انجام</span>`
+:""
+}
+
+${
+late
+?`<span class="badge late">${faNum(late)} عقب</span>`
+:""
+}
+
+</div>
+
+`;
+
+}
+
+}
+
+
+function calendarChoose(date){
+
+document.getElementById("plannerDateText").value=date;
+
+loadSelectedDate(date);
+
+renderCalendar();
+
+}
+
+
+/* =====================================================
+CALENDAR DATE SELECTOR
+===================================================== */
+
+function selectCalendarDate(){
+
+const y=
+Number(document.getElementById("calendarYear").value);
+
+const m=
+Number(document.getElementById("calendarMonth").value);
+
+const d=
+Number(document.getElementById("calendarDay").value);
+
+const max=jalaliMonthDays(y,m);
+
+if(d>max){
+
+alert("این روز در این ماه وجود ندارد.");
+return;
+
+}
+
+const date=
+y+"/"+String(m).padStart(2,"0")+
+"/"+String(d).padStart(2,"0");
+
+document.getElementById("plannerDateText").value=date;
+
+loadSelectedDate(date);
+
+}
+
+
+/* =====================================================
+LATE PLANS
+===================================================== */
+
+function renderLatePlans(){
+
+const box=document.getElementById("latePlans");
+
+const plans=
+db.plans.filter(p=>planStatus(p)==="late");
+
+if(!plans.length){
+
+box.innerHTML=
+'<div class="empty">برنامه عقب‌افتاده‌ای وجود ندارد.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+plans
+.sort((a,b)=>a.date.localeCompare(b.date))
+.map(planHTML)
+.join("");
+
+}
+
+
+/* =====================================================
+DAILY
+===================================================== */
+
+function openDailyToday(){
+
+showPageById("daily");
+
+document.getElementById("dailyDate").value=todayJ();
+
+}
+
+
+function saveDaily(){
+
+const date=
+normalizeJDate(
+document.getElementById("dailyDate").value
+);
+
+if(!date){
+
+alert("تاریخ صحیح وارد کنید.");
+return;
+
+}
+
+const item={
+
+id:Date.now(),
+
+date,
+
+newPages:
+Number(document.getElementById("dailyNewPages").value||0),
+
+minutes:
+Number(document.getElementById("dailyMinutes").value||0),
+
+review:
+document.getElementById("dailyReview").checked,
+
+ayat:
+document.getElementById("dailyAyat").checked,
+
+mental:
+document.getElementById("dailyMental").checked,
+
+vocabulary:
+document.getElementById("dailyVocabulary").checked,
+
+report:
+document.getElementById("dailyReport").value,
+
+weakness:
+document.getElementById("dailyWeakness").value
+
+};
+
+db.daily.push(item);
+
+saveDB();
+
+renderDaily();
+
+alert("گزارش روزانه ثبت شد.");
+
+}
+
+
+function renderDaily(){
+
+const box=document.getElementById("dailyList");
+
+if(!db.daily.length){
+
+box.innerHTML='<div class="empty">هنوز گزارشی ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+db.daily
+.slice()
+.reverse()
+.map(x=>`
+
+<div class="history-item">
+
+<strong>${faNum(x.date)}</strong>
+
+<div class="small">
+${faNum(x.newPages)} صفحه جدید |
+${faNum(x.minutes)} دقیقه
+</div>
+
+<p>${esc(x.report||"بدون گزارش")}</p>
+
+${
+x.weakness
+?`<div>نقطه ضعف: ${esc(x.weakness)}</div>`
+:""
+}
+
+<div class="action-row">
+
+<button class="secondary"
+onclick="deleteDaily(${x.id})">
+حذف
+</button>
+
+</div>
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+function deleteDaily(id){
+
+if(!confirm("گزارش حذف شود؟"))
+return;
+
+db.daily=db.daily.filter(x=>x.id!==id);
+
+saveDB();
+
+renderDaily();
+
+}
+
+
+/* =====================================================
+WEEKLY
+===================================================== */
+
+function saveWeekly(){
+
+const item={
+
+id:Date.now(),
+
+year:Number(document.getElementById("weeklyYear").value||0),
+
+week:Number(document.getElementById("weeklyNumber").value||0),
+
+report:document.getElementById("weeklyReport").value,
+
+plan:document.getElementById("weeklyPlan").value,
+
+created:new Date().toISOString()
+
+};
+
+db.weekly.push(item);
+
+saveDB();
+
+renderWeekly();
+
+alert("گزارش هفتگی ذخیره شد.");
+
+}
+
+
+function renderWeekly(){
+
+const box=document.getElementById("weeklyList");
+
+if(!db.weekly.length){
+
+box.innerHTML='<div class="empty">گزارشی ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+db.weekly
+.slice()
+.reverse()
+.map(x=>`
+
+<div class="history-item">
+
+<strong>
+سال ${faNum(x.year)} ـ هفته ${faNum(x.week)}
+</strong>
+
+<p>${esc(x.report||"بدون گزارش")}</p>
+
+<div>
+برنامه هفته آینده:
+${esc(x.plan||"ثبت نشده")}
+</div>
+
+<br>
+
+<button class="danger"
+onclick="deleteWeekly(${x.id})">
+حذف
+</button>
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+function deleteWeekly(id){
+
+if(!confirm("گزارش هفتگی حذف شود?"))
+return;
+
+db.weekly=db.weekly.filter(x=>x.id!==id);
+
+saveDB();
+
+renderWeekly();
+
+}
+
+
+/* =====================================================
+MONTHLY
+===================================================== */
+
+function saveMonthly(){
+
+const item={
+
+id:Date.now(),
+
+year:Number(document.getElementById("monthlyYear").value||0),
+
+month:Number(document.getElementById("monthlyNumber").value||0),
+
+report:document.getElementById("monthlyReport").value,
+
+success:document.getElementById("monthlySuccess").value,
+
+correction:document.getElementById("monthlyCorrection").value,
+
+goal:document.getElementById("monthlyGoal").value,
+
+created:new Date().toISOString()
+
+};
+
+db.monthly.push(item);
+
+saveDB();
+
+renderMonthly();
+
+alert("گزارش ماهانه ذخیره شد.");
+
+}
+
+
+function renderMonthly(){
+
+const box=document.getElementById("monthlyList");
+
+if(!db.monthly.length){
+
+box.innerHTML='<div class="empty">گزارشی ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+db.monthly
+.slice()
+.reverse()
+.map(x=>`
+
+<div class="history-item">
+
+<strong>
+سال ${faNum(x.year)} ـ ماه ${faNum(x.month)}
+</strong>
+
+<p>${esc(x.report||"بدون گزارش")}</p>
+
+<div>
+موفقیت:
+${esc(x.success||"ثبت نشده")}
+</div>
+
+<div>
+اصلاح:
+${esc(x.correction||"ثبت نشده")}
+</div>
+
+<div>
+هدف:
+${esc(x.goal||"ثبت نشده")}
+</div>
+
+<br>
+
+<button class="danger"
+onclick="deleteMonthly(${x.id})">
+حذف
+</button>
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+function deleteMonthly(id){
+
+if(!confirm("گزارش ماهانه حذف شود؟"))
+return;
+
+db.monthly=
+db.monthly.filter(x=>x.id!==id);
+
+saveDB();
+
+renderMonthly();
+
+}
+
+
+/* =====================================================
+QURAN SELECTOR
+===================================================== */
+
+function initJuz(){
+
+const s=
+document.getElementById("juzSelector");
+
+s.innerHTML="";
+
+for(let i=1;i<=30;i++){
+
+s.innerHTML+=
+`<option value="${i}">جزء ${faNum(i)}</option>`;
+
+}
+
+renderJuzPages();
+
+}
+
+
+function renderJuzPages(){
+
+const juz=
+Number(document.getElementById("juzSelector").value);
+
+const range=getJuzRange(juz);
+
+document.getElementById("juzTitle")
+.innerText=
+"جزء "+faNum(juz)+
+" ـ صفحات "+
+faNum(range.start)+
+" تا "+
+faNum(range.end);
+
+const box=document.getElementById("juzPages");
+
+box.innerHTML="";
+
+for(let p=range.start;p<=range.end;p++){
+
+const record=
+getPageRecord(p);
+
+const reviews=
+record.reviews.length;
+
+const plans=
+db.plans.filter(x=>Number(x.page)===p).length;
+
+box.innerHTML+=`
+
+<div class="page-mini"
+onclick="openQuranSpecific(${p})">
+
+<strong>${faNum(p)}</strong>
+
+<div>
+جزء ${faNum(juz)}
+</div>
+
+<div class="count">
+${faNum(reviews)} مرور |
+${faNum(plans)} برنامه
+</div>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+function searchQuranPage(){
+
+const p=
+Number(
+document.getElementById("pageSearch").value
+);
+
+if(p>=1&&p<=604){
+
+openQuranSpecific(p);
+
+}
+
+}
+
+
+function openQuranPage(){
+
+openQuranSpecific(
+db.settings.lastPage||1
+);
+
+}
+
+function openQuranSpecific(page){
+
+page=Number(page);
+
+if(page<1||page>604)return;
+
+selectedPage=page;
+
+db.settings.lastPage=page;
+
+saveDB();
+
+const rec=getPageRecord(page);
+
+document.getElementById("pageFile")
+.classList.remove("hidden");
+
+document.getElementById("selectedPageNumber")
+.innerText=
+"صفحه "+faNum(page);
+
+document.getElementById("selectedPageJuz")
+.innerText=
+faNum(getJuz(page));
+
+document.getElementById("selectedPageReviews")
+.innerText=
+faNum(rec.reviews.length);
+
+document.getElementById("selectedPageAyat")
+.innerText=
+faNum(rec.ayat.length);
+
+renderPagePlans();
+
+renderPageReviews();
+
+renderPageAyat();
+
+document.getElementById("pageFile")
+.scrollIntoView({
+behavior:"smooth"
+});
+
+}
+
+
+/* =====================================================
+PAGE PLANS
+===================================================== */
+
+function renderPagePlans(){
+
+const box=
+document.getElementById("pagePlans");
+
+const plans=
+db.plans.filter(
+p=>Number(p.page)===Number(selectedPage)
+);
+
+if(!plans.length){
+
+box.innerHTML=
+'<div class="empty">برای این صفحه برنامه‌ای ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+plans
+.sort((a,b)=>a.date.localeCompare(b.date))
+.map(planHTML)
+.join("");
+
+}
+
+
+/* =====================================================
+PAGE REVIEW
+===================================================== */
+
+function savePageReview(){
+
+if(!selectedPage){
+
+alert("ابتدا یک صفحه را انتخاب کنید.");
+return;
+
+}
+
+const date=
+normalizeJDate(
+document.getElementById("reviewDate").value
+||todayJ()
+);
+
+if(!date){
+
+alert("تاریخ صحیح وارد کنید.");
+return;
+
+}
+
+const rec=
+getPageRecord(selectedPage);
+
+rec.reviews.push({
+
+id:Date.now(),
+
+date,
+
+type:
+document.getElementById("reviewType").value,
+
+status:
+document.getElementById("reviewStatus").value,
+
+errors:
+Number(document.getElementById("reviewErrors").value||0),
+
+note:
+document.getElementById("reviewNote").value
+
+});
+
+saveDB();
+
+document.getElementById("reviewNote").value="";
+
+renderPageReviews();
+
+document.getElementById("selectedPageReviews")
+.innerText=faNum(rec.reviews.length);
+
+refreshAll();
+
+alert("مرور واقعی ثبت شد.");
+
+}
+
+
+function renderPageReviews(){
+
+const box=
+document.getElementById("pageReviewHistory");
+
+const rec=
+getPageRecord(selectedPage);
+
+if(!rec.reviews.length){
+
+box.innerHTML=
+'<div class="empty">هنوز مرور واقعی ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+rec.reviews
+.slice()
+.reverse()
+.map(r=>`
+
+<div class="history-item">
+
+<div class="plan-header">
+
+<strong>
+${faNum(r.date)}
+</strong>
+
+<span class="badge info">
+${esc(r.type)}
+</span>
+
+<span class="badge">
+${esc(r.status)}
+</span>
+
+</div>
+
+<div>
+خطاها: ${faNum(r.errors)}
+</div>
+
+<p>
+${esc(r.note||"بدون یادداشت")}
+</p>
+
+<button class="danger"
+onclick="deleteReview(${r.id})">
+حذف
+</button>
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+function deleteReview(id){
+
+if(!selectedPage)return;
+
+if(!confirm("این مرور حذف شود؟"))
+return;
+
+const rec=
+getPageRecord(selectedPage);
+
+rec.reviews=
+rec.reviews.filter(x=>x.id!==id);
+
+saveDB();
+
+renderPageReviews();
+
+document.getElementById("selectedPageReviews")
+.innerText=faNum(rec.reviews.length);
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+AYAT
+===================================================== */
+
+function addPageAyat(){
+
+if(!selectedPage)return;
+
+const number=
+document.getElementById("newAyatNumber").value;
+
+const text=
+document.getElementById("newAyatText").value;
+
+if(!number||!text){
+
+alert("شماره و عبارت سرآیه را وارد کنید.");
+return;
+
+}
+
+const rec=
+getPageRecord(selectedPage);
+
+rec.ayat.push({
+
+id:Date.now(),
+
+number,
+
+text,
+
+reviews:[]
+
+});
+
+saveDB();
+
+document.getElementById("newAyatNumber").value="";
+document.getElementById("newAyatText").value="";
+
+renderPageAyat();
+
+document.getElementById("selectedPageAyat")
+.innerText=faNum(rec.ayat.length);
+
+}
+
+
+function renderPageAyat(){
+
+const box=
+document.getElementById("pageAyatList");
+
+const rec=
+getPageRecord(selectedPage);
+
+if(!rec.ayat.length){
+
+box.innerHTML=
+'<div class="empty">سرآیه‌ای ثبت نشده.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+rec.ayat.map(a=>`
+
+<div class="history-item">
+
+<strong>
+سرآیه ${faNum(a.number)}
+</strong>
+
+<p>
+${esc(a.text)}
+</p>
+
+<div class="small">
+تعداد ثبت‌های مرتبط:
+${faNum(a.reviews?.length||0)}
+</div>
+
+<div class="action-row">
+
+<button class="secondary"
+onclick="addAyatReview(${a.id})">
+ثبت بازیابی سرآیه
+</button>
+
+<button class="danger"
+onclick="deleteAyat(${a.id})">
+حذف
+</button>
+
+</div>
+
+${
+a.reviews?.length
+?
+a.reviews
+.slice()
+.reverse()
+.map(r=>`
+
+<div class="small"
+style="margin-top:8px">
+
+${faNum(r.date)}
+ ـ ${esc(r.status)}
+ ـ ${esc(r.note||"")}
+
+</div>
+
+`)
+.join("")
+:""
+
+}
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+function addAyatReview(id){
+
+const rec=
+getPageRecord(selectedPage);
+
+const a=
+rec.ayat.find(x=>x.id===id);
+
+if(!a)return;
+
+const status=
+prompt(
+"وضعیت بازیابی سرآیه را وارد کنید:",
+"خوب"
+);
+
+if(!status)return;
+
+const note=
+prompt(
+"یادداشت:",
+""
+);
+
+if(!a.reviews)a.reviews=[];
+
+a.reviews.push({
+
+id:Date.now(),
+
+date:todayJ(),
+
+status,
+
+note:note||""
+
+});
+
+saveDB();
+
+renderPageAyat();
+
+}
+
+
+function deleteAyat(id){
+
+if(!confirm("سرآیه حذف شود؟"))
+return;
+
+const rec=
+getPageRecord(selectedPage);
+
+rec.ayat=
+rec.ayat.filter(x=>x.id!==id);
+
+saveDB();
+
+renderPageAyat();
+
+document.getElementById("selectedPageAyat")
+.innerText=faNum(rec.ayat.length);
+
+}
+
+
+/* =====================================================
+HISTORY
+===================================================== */
+
+function buildHistory(){
+
+let arr=[];
+
+
+/* PLANS */
+
+db.plans.forEach(p=>{
+
+arr.push({
+
+kind:"plan",
+
+id:p.id,
+
+date:p.date,
+
+title:
+"برنامه صفحه "+p.page,
+
+detail:
+p.type+" | "+(p.note||""),
+
+raw:p
+
+});
+
+});
+
+
+/* REVIEWS */
+
+Object.values(db.pages).forEach(pg=>{
+
+pg.reviews.forEach(r=>{
+
+arr.push({
+
+kind:"review",
+
+id:r.id,
+
+date:r.date,
+
+title:
+"مرور واقعی صفحه "+pg.page,
+
+detail:
+r.type+" | "+r.status+" | خطا: "+r.errors,
+
+raw:{
+page:pg.page,
+review:r
+}
+
+});
+
+});
+
+});
+
+
+/* DAILY */
+
+db.daily.forEach(x=>{
+
+arr.push({
+
+kind:"daily",
+
+id:x.id,
+
+date:x.date,
+
+title:"گزارش روزانه",
+
+detail:x.report||"",
+
+raw:x
+
+});
+
+});
+
+
+/* WEEKLY */
+
+db.weekly.forEach(x=>{
+
+arr.push({
+
+kind:"weekly",
+
+id:x.id,
+
+date:"",
+
+title:
+"گزارش هفته "+x.week,
+
+detail:x.report||"",
+
+raw:x
+
+});
+
+});
+
+
+/* MONTHLY */
+
+db.monthly.forEach(x=>{
+
+arr.push({
+
+kind:"monthly",
+
+id:x.id,
+
+date:"",
+
+title:
+"گزارش ماه "+x.month,
+
+detail:x.report||"",
+
+raw:x
+
+});
+
+});
+
+return arr;
+
+}
+
+
+function renderHistory(){
+
+const box=
+document.getElementById("historyResults");
+
+const q=
+(document.getElementById("historySearch").value||"")
+.toLowerCase();
+
+const date=
+normalizeJDate(
+document.getElementById("historyDate").value
+)||"";
+
+const type=
+document.getElementById("historyType").value;
+
+let arr=buildHistory();
+
+arr=arr.filter(x=>{
+
+const text=
+JSON.stringify(x).toLowerCase();
+
+return
+(!q||text.includes(q)) &&
+(!date||x.date===date) &&
+(!type||x.kind===type);
+
+});
+
+arr.sort((a,b)=>
+(b.date||"").localeCompare(a.date||"")
+);
+
+if(!arr.length){
+
+box.innerHTML=
+'<div class="empty">موردی پیدا نشد.</div>';
+
+return;
+
+}
+
+box.innerHTML=
+arr.map(historyHTML).join("");
+
+}
+
+
+function historyHTML(x){
+
+let buttons="";
+
+if(x.kind==="plan"){
+
+buttons=`
+
+<button class="secondary"
+onclick="editPlan('${x.id}')">
+ویرایش
+</button>
+
+<button class="primary"
+onclick="convertHistoryPlan('${x.id}')">
+تبدیل/بازتنظیم برنامه
+</button>
+
+<button class="danger"
+onclick="deletePlan('${x.id}')">
+حذف
+</button>
+
+`;
+
+}
+
+if(x.kind==="review"){
+
+buttons=`
+
+<button class="secondary"
+onclick="openQuranSpecific(${x.raw.page})">
+پرونده صفحه
+</button>
+
+<button class="danger"
+onclick="deleteReviewFromHistory(${x.raw.page},${x.raw.review.id})">
+حذف
+</button>
+
+`;
+
+}
+
+if(x.kind==="daily"){
+
+buttons=`
+
+<button class="danger"
+onclick="deleteDaily(${x.id})">
+حذف
+</button>
+
+`;
+
+}
+
+if(x.kind==="weekly"){
+
+buttons=`
+
+<button class="danger"
+onclick="deleteWeekly(${x.id})">
+حذف
+</button>
+
+`;
+
+}
+
+if(x.kind==="monthly"){
+
+buttons=`
+
+<button class="danger"
+onclick="deleteMonthly(${x.id})">
+حذف
+</button>
+
+`;
+
+}
+
+return`
+
+<div class="history-item">
+
+<div class="plan-header">
+
+<strong>
+${esc(x.title)}
+</strong>
+
+<span class="badge info">
+${esc(x.kind)}
+</span>
+
+${
+x.date
+?`<span>${faNum(x.date)}</span>`
+:""
+}
+
+</div>
+
+<p>
+${esc(x.detail)}
+</p>
+
+<div class="action-row">
+${buttons}
+</div>
+
+</div>
+
+`;
+
+}
+
+
+function deleteReviewFromHistory(page,id){
+
+selectedPage=page;
+
+deleteReview(id);
+
+renderHistory();
+
+}
+
+
+/* =====================================================
+HISTORY PLAN CONVERSION
+===================================================== */
+
+function convertHistoryPlan(id){
+
+const p=
+db.plans.find(x=>x.id===id);
+
+if(!p)return;
+
+const newDate=
+prompt(
+"تاریخ جدید برنامه را وارد کنید:",
+p.date
+);
+
+if(!newDate)return;
+
+const nd=normalizeJDate(newDate);
+
+if(!nd){
+
+alert("تاریخ صحیح نیست.");
+return;
+
+}
+
+p.date=nd;
+p.status="pending";
+
+saveDB();
+
+renderHistory();
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+DASHBOARD
+===================================================== */
+
+function renderDashboard(){
+
+const t=todayJ();
+
+const todayPlans=
+db.plans.filter(p=>p.date===t);
+
+const done=
+todayPlans.filter(p=>p.status==="done").length;
+
+const pending=
+todayPlans.filter(p=>planStatus(p)==="pending").length;
+
+const late=
+db.plans.filter(p=>planStatus(p)==="late").length;
+
+const reviews=
+Object.values(db.pages)
+.reduce((a,p)=>a+p.reviews.length,0);
+
+document.getElementById("dashToday")
+.innerText=faNum(todayPlans.length);
+
+document.getElementById("dashDone")
+.innerText=faNum(done);
+
+document.getElementById("dashPending")
+.innerText=faNum(pending);
+
+document.getElementById("dashLate")
+.innerText=faNum(late);
+
+document.getElementById("dashAllPlans")
+.innerText=faNum(db.plans.length);
+
+document.getElementById("dashReviews")
+.innerText=faNum(reviews);
+
+const total=db.plans.length;
+
+const completed=
+db.plans.filter(p=>p.status==="done").length;
+
+const percent=
+total
+?Math.round(completed/total*100)
+:0;
+
+document.getElementById("dashboardProgress")
+.style.width=percent+"%";
+
+document.getElementById("dashboardProgressText")
+.innerText=
+faNum(completed)+" از "+
+faNum(total)+
+" برنامه انجام شده است.";
+
+const box=
+document.getElementById("dashboardTodayPlans");
+
+if(!todayPlans.length){
+
+box.innerHTML=
+'<div class="empty">امروز برنامه‌ای ثبت نشده است.</div>';
+
+}else{
+
+box.innerHTML=
+todayPlans.map(planHTML).join("");
+
+}
+
+const cycle=
+getCycle(
+countCycleDaysFromStart()
+);
+
+document.getElementById("cycleMonth")
+.innerText=faNum(cycle.month);
+
+document.getElementById("cycleWeek")
+.innerText=faNum(cycle.week);
+
+document.getElementById("cycleDay")
+.innerText=faNum(cycle.dayOfMonth);
+
+document.getElementById("cycleTotal")
+.innerText=faNum(cycle.totalDay);
+
+renderChart();
+
+}
+
+
+function countCycleDaysFromStart(){
+
+const saved=
+localStorage.getItem("QURAN_CYCLE_START");
+
+if(!saved){
+
+localStorage.setItem(
+"QURAN_CYCLE_START",
+todayJ()
+);
+
+return 1;
+
+}
+
+return differenceJalaliDays(
+saved,
+todayJ()
+)+1;
+
+}
+
+
+/* =====================================================
+DATE DIFFERENCE
+===================================================== */
+
+function differenceJalaliDays(a,b){
+
+const pa=a.split("/").map(Number);
+const pb=b.split("/").map(Number);
+
+const ga=jalaliToGregorian(pa[0],pa[1],pa[2]);
+const gb=jalaliToGregorian(pb[0],pb[1],pb[2]);
+
+const da=
+Date.UTC(ga.gy,ga.gm-1,ga.gd);
+
+const dbb=
+Date.UTC(gb.gy,gb.gm-1,gb.gd);
+
+return Math.round((dbb-da)/86400000);
+
+}
+
+
+/* =====================================================
+CHART
+===================================================== */
+
+function renderChart(){
+
+const canvas=
+document.getElementById("mainChart");
+
+if(!canvas)return;
+
+if(mainChart)
+mainChart.destroy();
+
+const type=
+document.getElementById("chartType").value;
+
+let labels=[];
+let values=[];
+let chartType="doughnut";
+
+
+if(type==="status"){
+
+labels=[
+"انجام‌شده",
+"در انتظار",
+"عقب‌افتاده",
+"لغوشده"
+];
+
+values=[
+
+db.plans.filter(p=>p.status==="done").length,
+
+db.plans.filter(p=>planStatus(p)==="pending").length,
+
+db.plans.filter(p=>planStatus(p)==="late").length,
+
+db.plans.filter(p=>p.status==="cancelled").length
+
+];
+
+}
+
+
+if(type==="activity"){
+
+labels=[
+"مرور",
+"سرآیات",
+"گزارش روزانه",
+"گزارش هفتگی",
+"گزارش ماهانه"
+];
+
+values=[
+
+Object.values(db.pages)
+.reduce((a,p)=>a+p.reviews.length,0),
+
+Object.values(db.pages)
+.reduce((a,p)=>a+p.ayat.length,0),
+
+db.daily.length,
+
+db.weekly.length,
+
+db.monthly.length
+
+];
+
+}
+
+
+if(type==="juz"){
+
+labels=[];
+
+values=[];
+
+for(let j=1;j<=30;j++){
+
+let n=0;
+
+Object.values(db.pages)
+.forEach(p=>{
+
+if(p.juz===j)
+n+=p.reviews.length;
+
+});
+
+labels.push("جزء "+j);
+
+values.push(n);
+
+}
+
+chartType="bar";
+
+}
+
+
+if(type==="monthly"){
+
+const map={};
+
+db.plans.forEach(p=>{
+
+const y=p.date.substring(0,7);
+
+map[y]=(map[y]||0)+1;
+
+});
+
+const keys=
+Object.keys(map).sort().slice(-12);
+
+labels=keys;
+
+values=keys.map(k=>map[k]);
+
+chartType="bar";
+
+}
+
+
+mainChart=
+new Chart(canvas,{
+
+type:chartType,
+
+data:{
+
+labels,
+
+datasets:[{
+
+label:"تعداد",
+
+data:values
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+legend:{
+display:true
+}
+}
+
+}
+
+});
+
+}
+
+
+/* =====================================================
+REFRESH
+===================================================== */
+
+function refreshAll(){
+
+try{
+
+renderDashboard();
+
+renderSelectedDate(
+db.plans.filter(
+p=>p.date===selectedPlannerDate
+)
+);
+
+renderCalendar();
+
+renderLatePlans();
+
+renderDaily();
+
+renderWeekly();
+
+renderMonthly();
+
+renderJuzPages();
+
+renderHistory();
+
+if(selectedPage){
+
+openQuranSpecific(selectedPage);
+
+}
+
+}catch(e){
+
+console.error(e);
+
+}
+
+}
+
+
+/* =====================================================
+INIT
+===================================================== */
+
+function init(){
+
+loadDB();
+
+const t=todayJ();
+
+document.getElementById("plannerDateText").value=t;
+
+document.getElementById("dailyDate").value=t;
+
+document.getElementById("reviewDate").value=t;
+
+document.getElementById("weeklyYear").value=nowJalali().jy;
+
+document.getElementById("weeklyNumber").value=
+getCycle(countCycleDaysFromStart()).week;
+
+document.getElementById("monthlyYear").value=nowJalali().jy;
+
+document.getElementById("monthlyNumber").value=
+getCycle(countCycleDaysFromStart()).month;
+
+initCalendarSelectors();
+
+initDaySelector();
+
+initJuz();
+
+loadSelectedDate(t);
+
+refreshAll();
+
+}
+
+
+/* =====================================================
+DAY SELECTOR
+===================================================== */
+
+function initDaySelector(){
+
+const day=
+document.getElementById("calendarDay");
+
+day.innerHTML="";
+
+for(let i=1;i<=31;i++){
+
+day.innerHTML+=
+`<option value="${i}">${faNum(i)}</option>`;
+
+}
+
+const j=nowJalali();
+
+day.value=j.jd;
+
+document.getElementById("calendarMonth").value=j.jm;
+
+document.getElementById("calendarYear").value=j.jy;
+
+}
+
+
+/* =====================================================
+BACKUP
+===================================================== */
+
+function exportData(){
+
+const data={
+
+version:6,
+
+exportedAt:new Date().toISOString(),
+
+db,
+
+cycleStart:
+localStorage.getItem("QURAN_CYCLE_START")
+
+};
+
+const blob=
+new Blob(
+[JSON.stringify(data,null,2)],
+{type:"application/json"}
+);
+
+const url=
+URL.createObjectURL(blob);
+
+const a=
+document.createElement("a");
+
+a.href=url;
+
+a.download=
+"quran-system-backup.json";
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+
+
+function importData(event){
+
+const file=
+event.target.files[0];
+
+if(!file)return;
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+try{
+
+const data=
+JSON.parse(reader.result);
+
+if(data.db){
+
+db=data.db;
+
+saveDB();
+
+if(data.cycleStart){
+
+localStorage.setItem(
+"QURAN_CYCLE_START",
+data.cycleStart
+);
+
+}
+
+refreshAll();
+
+alert("پشتیبان با موفقیت بازیابی شد.");
+
+}else{
+
+alert("فایل پشتیبان معتبر نیست.");
+
+}
+
+}catch(e){
+
+alert("خطا در بازیابی فایل.");
+
+}
+
+};
+
+reader.readAsText(file);
+
+}
+
+
+function clearAllData(){
+
+if(!confirm(
+"تمام برنامه‌ها، گزارش‌ها، مرورها و اطلاعات صفحات حذف شوند؟"
+))
+return;
+
+if(!confirm(
+"این عملیات قابل بازگشت نیست. مطمئنی؟"
+))
+return;
+
+localStorage.removeItem(STORAGE_KEY);
+localStorage.removeItem("QURAN_CYCLE_START");
+
+location.reload();
+
+}
+
+
+/* =====================================================
+START
+===================================================== */
+
+init();
+
+</script>
+
+</body>
+</html>
